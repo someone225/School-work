@@ -60,8 +60,6 @@ def main():
         start_index = 0
         start_reached = False
 
-        end_index = 0
-
         for j in range(0, len(parsed_input[i])):
             if(parsed_input[i][start_index] == ':'):
                 start_reached = True
@@ -74,7 +72,7 @@ def main():
 
     input_file.close()
 
-    
+
     test = substance()
     test.initialize(input_values)
     print(test.absobancy[2])
