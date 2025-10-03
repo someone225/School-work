@@ -6,7 +6,7 @@ Description:
     calculate photon absorbtion of a material given an input file containint relevant data
 
 Assignment Information:
-    Assignment:     e.g. 10.2.3 Py4 Team 19 
+    Assignment:     e.g. 10.2.3 Py4 Team 3
     Team ID:        007 - 19
     Author:         mark, sheng65@purdue.edu
     Date:           e.g. 01/23/2025
@@ -36,6 +36,7 @@ Academic Integrity Statement:
 #imports
 import math as m
 import requests
+#MAKE SURE TO RUN 'pip install requests' BEFORE RUNNING FOR THE FIRST TIME
 
 #global constants
 
@@ -67,15 +68,16 @@ def main():
             if(start_reached == False):
                 start_index += 1
         for j in range (start_index + 1, len(parsed_input[i]) - 4):
+            #lower bound set as start_index + 1 as start_index counts the index that the colon is at
             #upper bound set as len() - 4 as the last 4 characters \n'] must be removed
             input_values[i] += parsed_input[i][j]
 
     input_file.close()
 
 
-    test = substance()
-    test.initialize(input_values)
-    print(test.absobancy[2])
+    new_sub = substance()
+    new_sub.initialize(input_values)
+    new_sub.output()
      
 '''
 substance is a class which contains data about the target substance
@@ -90,9 +92,10 @@ class substance:
     name = ''
     path_length = 0
     extincion_coefficient = 0
-    absobancy = [0] * 3
+    absorbancy = [0] * 3
+    concentration = [0] * 3
 
-    def initialize(self, values):
+    def initialize(self, values) -> None:
         indexer = 0
         for i in range(0, len(values)):
             match i:
@@ -103,12 +106,25 @@ class substance:
                 case 2:
                     self.extincion_coefficient = int(values[i])
                 case _:
-                    self.absobancy[indexer] = float(values[i])
+                    self.absorbancy[indexer] = float(values[i])
                     indexer += 1
+        for i in range(0, len(self.absorbancy)):
+            self.concentration[i] = absorb_calc(self.absorbancy[i], self.path_length, self.extincion_coefficient)
         
+
+    #well it seems the autograder doesn't accept helper functions that reference self
+    #and we have to program absorb_calc to take in 3 args instead of a class
+
+    def output(self) -> None:
+        print("The name of the substance is %s " %self.name, sep = '')
+        for i in range (0, len(self.absorbancy)):
+            print("For %.4f " %self.absorbancy[i], " absorbancy value, the concentration is %.7f" %self.concentration[i], sep = '')
             
     
-
+def absorb_calc(absorbancy, path_length, coefficient) -> float:
+    #absorbancy = path_length * coefficient * concentration
+    #concentration = absorbancy / (path_length * coefficient)
+    return (absorbancy / (path_length * coefficient) )
     
 
 
