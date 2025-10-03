@@ -1,28 +1,25 @@
 """
 Course Number: ENGR 13300
-Semester: Fall 2025
+Semester: fall 2025
 
 Description:
-    calculate photon absorbtion of a material given an input file containint relevant data
+    Replace this line with a description of your program.
 
 Assignment Information:
-    Assignment:     e.g. 10.2.3 Py4 Team 3
-    Team ID:        007 - 19
-    Author:         mark, sheng65@purdue.edu
-    Date:           e.g. 01/23/2025
+    Assignment:     10.2.3 Py4 Team 19 (for Python 4 Team task 4)
+    Team ID:        (LC1 - 01; for section LC1, team 19)
+    Author:         erdem, eamarsa@purdue.edu
+    Date:           10/2/2025
 
 Contributors:
-    Mark, sheng65@purdue
-    Akshada, dakea@purdue
-    Erdem, eamarsa@purdue
-    Milagros, mmelhemb@purdue 
+    mark, msheng@purdue.edu 
 
     My contributor(s) helped me:
-    [ ] understand the assignment expectations without
+    [x] understand the assignment expectations without
         telling me how they will approach it.
-    [ ] understand different ways to think about a solution
+    [x] understand different ways to think about a solution
         without helping me plan my solution.
-    [ ] think through the meaning of a specific error or
+    [x] think through the meaning of a specific error or
         bug present in my code without looking at my code.
     Note that if you helped somebody else with their code, you
     have to list that person as a contributor here as well.
@@ -33,79 +30,81 @@ Academic Integrity Statement:
     another student access to my code.  The project I am
     submitting is my own original work.
 """
-#imports
-import math as m
-import requests
-#MAKE SURE TO RUN 'pip install requests' BEFORE RUNNING FOR THE FIRST TIME
 
-#global constants
+""" Write any import statements here (and delete this line)."""
 
+import math
+import sys
 
+def absorb_calc(absorbancy, path_length, coefficient) -> float:
+    #absorbancy = path_length * coefficient * concentration
+    #concentration = absorbancy / (path_length * coefficient)
+    return (absorbancy / (path_length * coefficient) )
+
+def count_lines(input):
+    lines = 1
+    for i in range(0, len(input)):
+        if(input[i] == "\n"):
+            lines += 1
+    return lines
 
 def main():
-    #pull test input file data from github repo
-    url = "https://raw.githubusercontent.com/someone225/School-work/refs/heads/main/ENGR133/10/task%203/py4_task3_input.txt"
-    load_repo = requests.get(url)
-    #load input contents into a local file for local access
-    with open("input.txt", "w") as t:
-        t.write(load_repo.text)
+    file_name = "py4_task3_input.txt"
+
+    #the reason this code's output was breaking was because while strings and character lists are mostly identical,
+    #.strip() and .split() will run but actually do nothing on character lists, while they work as intended on strings
+
+    file = open(file_name, "r") 
+    data_line = file.read().strip()
+    lines = count_lines(data_line)
+        
+    input_values = [''] * lines
+
+    #parsing algorithm
+    start_index = 0
+    end_index = 0
+    cur_line = 0
+    for i in range (0, len(data_line)): 
+
+        if(data_line[i] == ':'):
+            start_index = i
+        if(data_line[i] == '\n'):
+            #print("debug: cur line - %d" %cur_line)
+            end_index = i
+            for j in range(start_index + 2, end_index):
+                input_values[cur_line] += data_line[j]
+            cur_line += 1
+
+            #special case handling for last line parsing
+            if(cur_line == (lines - 1) ):
+                for j in range(len(data_line) - 6, len(data_line) ):
+                    input_values[cur_line] += data_line[j]
+        
+    #print(input_values)
+
+    file.close()
     
-    parsed_input = [''] * 6
-    input_values = [''] * 6
+    my_substance = substance()
+    my_substance.initialize(input_values)
+    my_substance.output()
 
-    #open local file for reading
-    #for some reason calling the name directly like the assignment wanted doesnt work for me
-    #so for testing local code im pulling from github repo instead
-    input_file = open("py4_task3_input.txt", "r")   
-    
-    for i in range (0, len(parsed_input)): 
-        parsed_input[i] = str(input_file.readlines(1))
-
-        start_index = 0
-        start_reached = False
-
-        for j in range(0, len(parsed_input[i])):
-            if(parsed_input[i][start_index] == ':'):
-                start_reached = True
-
-            if(start_reached == False):
-                start_index += 1
-        for j in range (start_index + 1, len(parsed_input[i]) - 4):
-            #lower bound set as start_index + 1 as start_index counts the index that the colon is at
-            #upper bound set as len() - 4 as the last 4 characters \n'] must be removed
-            input_values[i] += parsed_input[i][j]
-
-    input_file.close()
-
-
-    new_sub = substance()
-    new_sub.initialize(input_values)
-    new_sub.output()
-     
-'''
-substance is a class which contains data about the target substance
-
-basic class calls:
-first declare a class as class_name = substance() in main
-then reference a target value using class_name.value
-eg. to get substance name, use class_name.name
-'''
 
 class substance:
     name = ''
     path_length = 0
     extincion_coefficient = 0
-    absorbancy = [0] * 3
-    concentration = [0] * 3
-
+    absorbancy = 0
+    concentration = 0
     def initialize(self, values) -> None:
+        self.absorbancy = [0] * (len(values) - 3)
+        self.concentration = [0] * (len(values) - 3)
         indexer = 0
         for i in range(0, len(values)):
             match i:
                 case 0:
                     self.name = values[i]
                 case 1:
-                    self.path_length = int(values[i])
+                    self.path_length = float(values[i])
                 case 2:
                     self.extincion_coefficient = int(values[i])
                 case _:
@@ -121,14 +120,17 @@ class substance:
     def output(self) -> None:
         print("The name of the substance is %s " %self.name, sep = '')
         for i in range (0, len(self.absorbancy)):
-            print("For %.4f " %self.absorbancy[i], " absorbancy value, the concentration is %.7f" %self.concentration[i], sep = '')
-            
-    
-def absorb_calc(absorbancy, path_length, coefficient) -> float:
-    #absorbancy = path_length * coefficient * concentration
-    #concentration = absorbancy / (path_length * coefficient)
-    return (absorbancy / (path_length * coefficient) )
-    
+            print("For %.4f " %self.absorbancy[i], "absorbency value, the concentration is %.7f" %self.concentration[i], sep = '')
+
+
+
+
+
+
+
+
+
+
 
 
 if __name__ == "__main__":
