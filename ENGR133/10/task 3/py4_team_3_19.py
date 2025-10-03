@@ -6,7 +6,7 @@ Description:
     Replace this line with a description of your program.
 
 Assignment Information:
-    Assignment:     10.2.3 Py4 Team 19 (for Python 4 Team task 4)
+    Assignment:     10.2.3 Py4 Team 3 (for Python 4 Team task 4)
     Team ID:        (LC1 - 01; for section LC1, team 19)
     Author:         erdem, eamarsa@purdue.edu
     Date:           10/2/2025
@@ -36,11 +36,6 @@ Academic Integrity Statement:
 import math
 import sys
 
-def absorb_calc(absorbancy, path_length, coefficient) -> float:
-    #absorbancy = path_length * coefficient * concentration
-    #concentration = absorbancy / (path_length * coefficient)
-    return (absorbancy / (path_length * coefficient) )
-
 def count_lines(input):
     lines = 1
     for i in range(0, len(input)):
@@ -50,12 +45,19 @@ def count_lines(input):
 
 def main():
     file_name = "py4_task3_input.txt"
-
+    try:
+        with open(file_name, 'r') as file:
+            data_line = file.read().strip()
+    except FileNotFoundError:
+        print(f"file not found: {file_name}. sample data for example.", file=sys.stderr)
+        data_line = "glucose oxidase, 1.0, 19400.0, 0.9863, 0.6868, 0.4462"
+    except Exception as e:
+        print(f"an error occurred while reading the file: {e}", file=sys.stderr)
+        return 0
     #the reason this code's output was breaking was because while strings and character lists are mostly identical,
     #.strip() and .split() will run but actually do nothing on character lists, while they work as intended on strings
 
     file = open(file_name, "r") 
-    data_line = file.read().strip()
     lines = count_lines(data_line)
         
     input_values = [''] * lines
@@ -79,11 +81,11 @@ def main():
             if(cur_line == (lines - 1) ):
                 for j in range(len(data_line) - 6, len(data_line) ):
                     input_values[cur_line] += data_line[j]
-        
-    #print(input_values)
 
-    file.close()
     
+
+    
+    file.close()
     my_substance = substance()
     my_substance.initialize(input_values)
     my_substance.output()
@@ -112,26 +114,20 @@ class substance:
                     indexer += 1
         for i in range(0, len(self.absorbancy)):
             self.concentration[i] = absorb_calc(self.absorbancy[i], self.path_length, self.extincion_coefficient)
+
+def absorb_calc(absorbancy, path_length, coefficient) -> float:
+    #absorbancy = path_length * coefficient * concentration
+    #concentration = absorbancy / (path_length * coefficient)
+    return (absorbancy / (path_length * coefficient) )
         
 
     #well it seems the autograder doesn't accept helper functions that reference self
     #and we have to program absorb_calc to take in 3 args instead of a class
 
     def output(self) -> None:
-        print("The name of the substance is %s " %self.name, sep = '')
+        print("The name of the substance is %s" %self.name, sep = '')
         for i in range (0, len(self.absorbancy)):
             print("For %.4f " %self.absorbancy[i], "absorbency value, the concentration is %.7f" %self.concentration[i], sep = '')
-
-
-
-
-
-
-
-
-
-
-
 
 if __name__ == "__main__":
     main()
