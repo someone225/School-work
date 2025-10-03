@@ -115,12 +115,6 @@ class substance:
         for i in range(0, len(self.absorbancy)):
             self.concentration[i] = absorb_calc(self.absorbancy[i], self.path_length, self.extincion_coefficient)
 
-def absorb_calc(absorbancy, path_length, coefficient) -> float:
-    #absorbancy = path_length * coefficient * concentration
-    #concentration = absorbancy / (path_length * coefficient)
-    return (absorbancy / (path_length * coefficient) )
-        
-
     #well it seems the autograder doesn't accept helper functions that reference self
     #and we have to program absorb_calc to take in 3 args instead of a class
 
@@ -128,6 +122,11 @@ def absorb_calc(absorbancy, path_length, coefficient) -> float:
         print("The name of the substance is %s" %self.name, sep = '')
         for i in range (0, len(self.absorbancy)):
             print("For %.4f " %self.absorbancy[i], "absorbency value, the concentration is %.7f" %self.concentration[i], sep = '')
+
+def absorb_calc(absorbancy, path_length, coefficient) -> float:
+    #absorbancy = path_length * coefficient * concentration
+    #concentration = absorbancy / (path_length * coefficient)
+    return (absorbancy / (path_length * coefficient) )
 
 if __name__ == "__main__":
     main()
