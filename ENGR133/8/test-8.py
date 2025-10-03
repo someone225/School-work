@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 def turbine_power(a, b, v):
     """
     Args:
@@ -20,4 +21,28 @@ def zero_power_error():
     print("zero turbine power")
 
 
+=======
+def turbine_power(a, b, v):
+    """
+    Args:
+        a: air density
+        b: blade length
+        v: air speed
+
+    Returns:
+        return desc.
+    
+    """
+    match b:
+        case 0:
+            options[0]
+    options = {0: zero_power_error
+
+    }
+
+def zero_power_error():
+    print("zero turbine power")
+
+
+>>>>>>> a998878671f29f8f2a90f144218016037d78c5a9
         

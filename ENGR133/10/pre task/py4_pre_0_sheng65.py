@@ -42,6 +42,9 @@ import numpy as np
 from PIL import Image  #type: ignore
 from PIL import ImageOps #type: ignore
 
+INPUT_FILE_PATH = 'C:/Users/marks/Documents/GitHub/School-work/ENGR133/10/pre task/py4_pre_0_data.csv'
+OUTPUT_FILE_PATH = "C:/Users/marks/Documents/GitHub/School-work/ENGR133/10/pre task/py4_pre_0_sheng65.csv"
+
 
 
 
@@ -58,7 +61,7 @@ def main():
     data_col_2_str = [''] * 10
 
 
-    with open('C:/Users/marks/Desktop/ENGR133/10/pre task/py4_pre_0_data.csv', 'r') as csvfile:
+    with open(INPUT_FILE_PATH, 'r') as csvfile:
         f = csvfile.readlines(0)
         for i in range(0, len(f)):
             z = 0
@@ -87,7 +90,7 @@ def main():
         ax.scatter(data_col_1_int, data_col_2_int)
         plt.show()
 
-    with open('C:/Users/marks/Desktop/ENGR133/10/pre task/py4_pre_0_sheng65.csv', 'w') as csv_output:
+    with open(OUTPUT_FILE_PATH, 'w') as csv_output:
         for i in range(0, len(data_col_1_int)):
             csv_output.write(f"{data_col_1_int[i]},{data_col_2_int[i]}\n")
         
