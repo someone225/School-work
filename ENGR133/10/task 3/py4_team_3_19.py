@@ -43,17 +43,20 @@ import requests
 
 
 def main():
-    #pull input file data from github repo
+    #pull test input file data from github repo
     url = "https://raw.githubusercontent.com/someone225/School-work/refs/heads/main/ENGR133/10/task%203/py4_task3_input.txt"
     load_repo = requests.get(url)
     #load input contents into a local file for local access
     with open("input.txt", "w") as t:
         t.write(load_repo.text)
+    
     parsed_input = [''] * 6
     input_values = [''] * 6
 
     #open local file for reading
-    input_file = open("input.txt", "r")   
+    #for some reason calling the name directly like the assignment wanted doesnt work for me
+    #so for testing local code im pulling from github repo instead
+    input_file = open("py4_task3_input.txt", "r")   
     
     for i in range (0, len(parsed_input)): 
         parsed_input[i] = str(input_file.readlines(1))
