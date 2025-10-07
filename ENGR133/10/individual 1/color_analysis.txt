@@ -1,0 +1,4 @@
+Image: grayscale_image.jpeg
+Red Channel Mean: 0.00
+Green Channel Mean: 0.00
+Blue Channel Mean: 0.00
