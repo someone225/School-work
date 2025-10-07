@@ -73,15 +73,16 @@ def main():
 
             #check for ValueError on 8-bit formatting
             #if not, this means the image is not 8-bit
+
             try:
                 uint8_data = np.array(img_data, dtype = np.uint8)
-
                 if(img_data.ndim == 3): #color images
                     ch_red = uint8_data[:, :, 0] / 255 
                     ch_green = uint8_data[:, :, 1] / 255
                     ch_blue = uint8_data[:, :, 2] / 255
 
                     #normalize channel values
+                    
                     normalize(ch_red)
                     normalize(ch_blue)
                     normalize(ch_green)
@@ -112,6 +113,13 @@ def main():
                     y_val = luminance(r_sum, g_sum, b_sum)
 
                     #plot histogram
+                    plot_data = [plot_red, plot_green, plot_blue]
+                    
+
+
+
+                    y_val = luminance(r_sum, g_sum, b_sum)
+
                     plt.title('RGB Intensity Histogram')
                     plt.xlabel("Pixel value (0-255)")
                     plt.ylabel("Quantity")
