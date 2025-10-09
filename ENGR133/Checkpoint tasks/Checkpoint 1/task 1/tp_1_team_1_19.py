@@ -49,43 +49,62 @@ import pathlib as pt
 CHANNEL_WEIGHTS = [0.2126, 0.7152, 0.0722]
 
 def main():
-    in_path = str(input("Enter the path of the image you want to load: "))
-    im = Image.open(in_path)
-    img_in_data = np.asarray(im)
-    #test grayscale conversion function
+    in_path = ''
     load_img(in_path)
 
+class image:
+    in_path: str
+    img_data: list
+    ch_data: list
+    def __init__(self):
+        self.in_path = str(input("Enter the path of the image you want to load: "))
+        t = Image.open(self.in_path)
+        self.img_data = np.asarray(t, dtype= np.uint8)
+        self.img_data = self.img_data.copy()
+    
+    def get_rgb_data(self):
+        user_input = str(input("Would you like to convert to grayscale?\n"))
 
-def load_img(path) -> str:
-    img = Image.open(path)
-    img_data = np.asarray(img, dtype= np.uint8)
+        match user_input:
+            case 'yes':
+                self.img_data = rgb_to_grayscale(self.img_data)
+            case 'no':
+                for i in range(0, 3):
+                    self.ch_data = np.zeros( (3, len(self.img_data), len(self.img_data[0]) ) )
+                    self.ch_data[i] = self.img_data[:,:,i] / 255
+                    normalize(self.ch_data[i])
+                    self.img_data[:,:,i] = self.ch_data[i] * 255
+            case _:
+                raise ValueError
+    
+    def get_grayscale_data(self):
+        self.ch_data = self.img_data / 255
+        normalize(self.ch_data)
+        self.ch_data = self.ch_data * 255
+    
+    def show_image(self):
+        img_out = Image.fromarray(self.img_data)
+        img_out.show()
 
-    match img_data.ndim:
+def load_img(path):
+    img = image()
+    match img.img_data.ndim:
         case 2: # grayscale, normalize data and open
-            ch_gray = img_data / 255
-            normalize(ch_gray)
-            img_out_data = ch_gray * 255
-            img_out = Image.fromarray(img_out_data)
-            img_out.show()
+            img.get_grayscale_data()
+            img.show_image()
 
         case 3: #rgb
-            #code
-            print('test rgb case') #remove when finished
-            ch_r = img_data[:,:,0]
-            ch_g = img_data[:,:,1]
-            ch_b = img_data[:,:,2]
-
-            
+            img.get_rgb_data()
+            img.show_image()
 
         case 4: #rgbA
-            #code
-            print('test rgbA case') #remove when finished
+            #code for rgbA data is functionally similar to getting rgb data as the 4th channel is simply ignored
+            img.get_rgb_data()
+            img.show_image()
         case _: #default case, expecting an error in data if none above cases match
             raise ValueError
     
 def rgb_to_grayscale (img_array):
-
-
     ch_r = img_array[:,:,0] / 255
     ch_g = img_array[:,:,1] / 255
     ch_b = img_array[:,:,2] / 255
