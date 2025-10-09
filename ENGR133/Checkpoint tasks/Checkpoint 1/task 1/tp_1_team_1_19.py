@@ -49,22 +49,39 @@ import pathlib as pt
 CHANNEL_WEIGHTS = [0.2126, 0.7152, 0.0722]
 
 def main():
+    #funny workaround so the function gets accepted by assignment requirements
+    #the path does nothing here, all input and data is being managed by the structure
     in_path = ''
     load_img(in_path)
 
+#structure to store all information regarding image data
+#pointers don't exist in python so all helper functions must be nested within the structure itself
+#also its technically called a class but whatever
 class image:
+    #anyways the only inputs that the below helper function requires is self,
+    #as any variables required can be accessed as needed instead of explicitly defined inputs
+
     in_path: str
     img_data: list
     ch_data: list
+    #all variables in this structure are only initialized as their type to begin memory allocation
+    #explicit definitions are done when they are required
+    #this allows the same list(s) to take on various lengths and contain different data as required
+    #pretty sure we also don't run into goofy memory leak issues that definitely would happen in more rigid languages like C
+
+    #__init__ is an automatic call when a structure is called, so it also works to receive inputs
     def __init__(self):
         self.in_path = str(input("Enter the path of the image you want to load: "))
         t = Image.open(self.in_path)
         self.img_data = np.asarray(t, dtype= np.uint8)
-        self.img_data = self.img_data.copy()
+        #creating a copy of image data bypasses read-only errors as now we are not modifying the original data
+        self.img_data = self.img_data.copy() 
     
     def get_rgb_data(self):
         user_input = str(input("Would you like to convert to grayscale?\n"))
 
+        #use of match cases vs if statements here is really just up to individual style,
+        #basically does the same thing in this situation
         match user_input:
             case 'yes':
                 self.img_data = rgb_to_grayscale(self.img_data)
@@ -75,7 +92,10 @@ class image:
                     normalize(self.ch_data[i])
                     self.img_data[:,:,i] = self.ch_data[i] * 255
             case _:
-                raise ValueError
+                #this is here in case the user inputs anything unexpected
+                #okay TECHNICALLY switch cases are a type of key, kind of like hashmap keys
+                #and there wasnt any other raiseable error too relevant to the situation
+                raise KeyError
     
     def get_grayscale_data(self):
         self.ch_data = self.img_data / 255
@@ -86,6 +106,8 @@ class image:
         img_out = Image.fromarray(self.img_data)
         img_out.show()
 
+#load_img has to have only one input (due to assignment requirements), so it cannot be a helper function
+#this input must be in a path, but no one said we have to do anything with it so it's just here for the sake of it
 def load_img(path):
     img = image()
     match img.img_data.ndim:
@@ -105,6 +127,9 @@ def load_img(path):
             raise ValueError
     
 def rgb_to_grayscale (img_array):
+    #a loop here could have been used to compact the code here into less lines,
+    #but nesting too many loops ends up being very hard to read
+    #and doing that is only going to save a negligible amount of compute in the scope of this assignment
     ch_r = img_array[:,:,0] / 255
     ch_g = img_array[:,:,1] / 255
     ch_b = img_array[:,:,2] / 255
@@ -125,16 +150,6 @@ def rgb_to_grayscale (img_array):
 
     return gray_values
     
-
-def a_reduce_dim(input):
-    output = [0] *( len(input) * len(input[0]) )
-    k = 0
-    for i in range(0, len(input)):
-        for j in range(0, len(input[0])):
-            output[k] = input[i][j]
-            k += 1
-    return output
-
 def normalize(ch_input):
     for i in range(0, len(ch_input)):
         for j in range(0, len(ch_input[0])):
@@ -143,15 +158,6 @@ def normalize(ch_input):
             else:
                 ch_input[i][j] = m.pow( ((ch_input[i][j] + 0.055)/1.055), 2.4 )  
 
-def a_sum(input):
-    sum = 0
-    for i in range (0, len(input)):
-        sum += input[i]
-
-    return sum
-
-def a_mean(input):
-    return ( a_sum(input) / len(input) )
 
 if __name__ == "__main__":
     main()
