@@ -12,7 +12,11 @@ Assignment Information:
     Date:           09/10/2025
 
 Contributors:
-    Name, login@purdue [repeat for each]
+    Mark, sheng65@purdue [repeat for each]
+    Akshada, dakea@purdue
+    Erdem, eamarsa@purdue
+    Milagros, mmelhemb@purdue 
+
 
     My contributor(s) helped me:
     [ ] understand the assignment expectations without
@@ -93,9 +97,8 @@ class image:
                     self.img_data[:,:,i] = self.ch_data[i] * 255
             case _:
                 #this is here in case the user inputs anything unexpected
-                #okay TECHNICALLY switch cases are a type of key, kind of like hashmap keys
-                #and there wasnt any other raiseable error too relevant to the situation
-                raise KeyError
+                #raise ValueError as the user has inputted an unexpected value
+                raise ValueError
     
     def get_grayscale_data(self):
         self.ch_data = self.img_data / 255
@@ -109,6 +112,21 @@ class image:
 #load_img has to have only one input (due to assignment requirements), so it cannot be a helper function
 #this input must be in a path, but no one said we have to do anything with it so it's just here for the sake of it
 def load_img(path):
+    """
+    loads an image
+    Args:
+        path <unused>: does nothing, really. It is a depreciated value that does not hold any type and is not modified
+                       previously used to represent the path of desired image to open, but that information is now 
+                       stored in the image structure
+    Returns: 
+        if image is grayscale -> void, displays linearlized grayscale image
+        if image is rgb/rgbA -> void, asks user for conversion confirmation, then displays image as requested
+        if none of the above -> void, raises IndexError
+
+    Dependencies: 
+        requires library 'numpy' for array dimensions switch case
+        requires an initialized 'image' structure
+    """
     img = image()
     match img.img_data.ndim:
         case 2: #grayscale
@@ -124,9 +142,24 @@ def load_img(path):
             img.get_rgb_data()
             img.show_image()
         case _: #default case, expecting an error in data if none above cases match
-            raise ValueError
+            #raise IndexError as the program is unsure if there is sufficient dimensions to index output data
+            raise IndexError
     
 def rgb_to_grayscale (img_array):
+    """
+    converts an array of rgb pixel values into grayscale using the grayscale conversion algorithm
+    Args:
+        img_array: a 3 dimensional array containing data on the image
+                   more specifically, it is a numpy array obtained from calling
+                   numpy.asarray on PIL.Image.open, and NOT an appended list of
+                   rgb pixel values
+    Returns: 
+        gray_values: a 2 dimensional array containing grayscale converted pixel values for the image
+
+    Dependencies: 
+        reqires module 'Image' from library 'PIL' for valid input data
+        requires library 'numpy' for valid input type
+    """
     ch_data = [0] * 3
     for i in range(0, len(ch_data)):
         ch_data[i] = img_array[:,:,i] / 255
@@ -143,6 +176,17 @@ def rgb_to_grayscale (img_array):
     return gray_values
     
 def normalize(ch_input):
+    """
+    normalizes an input array according to the rgb linearlization algorithm
+    Args:
+        ch_input: a 2d array containing pixel values of one rgb channel
+
+    Returns: 
+        void
+
+    Dependencies: 
+        none
+    """
     for i in range(0, len(ch_input)):
         for j in range(0, len(ch_input[0])):
             if(ch_input[i][j] <= 0.0405):
