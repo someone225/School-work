@@ -111,7 +111,7 @@ class image:
 def load_img(path):
     img = image()
     match img.img_data.ndim:
-        case 2: # grayscale, normalize data and open
+        case 2: #grayscale
             img.get_grayscale_data()
             img.show_image()
 
@@ -127,26 +127,18 @@ def load_img(path):
             raise ValueError
     
 def rgb_to_grayscale (img_array):
-    #a loop here could have been used to compact the code here into less lines,
-    #but nesting too many loops ends up being very hard to read
-    #and doing that is only going to save a negligible amount of compute in the scope of this assignment
-    ch_r = img_array[:,:,0] / 255
-    ch_g = img_array[:,:,1] / 255
-    ch_b = img_array[:,:,2] / 255
+    ch_data = [0] * 3
+    for i in range(0, len(ch_data)):
+        ch_data[i] = img_array[:,:,i] / 255
+        normalize(ch_data[i])
+        ch_data[i] = ch_data[i] * CHANNEL_WEIGHTS[i]
 
-    gray_values = np.zeros((len(ch_r), len(ch_r[0])))
-    
-    normalize(ch_r)
-    normalize(ch_g)
-    normalize(ch_b)
-
-    ch_r = ch_r * CHANNEL_WEIGHTS[0]
-    ch_g = ch_g * CHANNEL_WEIGHTS[1]
-    ch_b = ch_b * CHANNEL_WEIGHTS[2]
+    gray_values = np.zeros((len(ch_data[0]), len(ch_data[0][0])))
 
     for i in range(0, len(gray_values)):
         for j in range(0, len(gray_values[0])):
-            gray_values[i][j] = ch_r[i][j] * 255 + ch_g[i][j] * 255 + ch_b[i][j] * 255
+            for k in range(0, len(ch_data)):
+                gray_values[i][j] += ch_data[k][i][j] * 255 
 
     return gray_values
     
