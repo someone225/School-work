@@ -3,7 +3,8 @@ Course Number: ENGR 13300
 Semester: Fall 2025
 
 Description:
-    Replace this line with a description of your program.
+    Checkpoint 1 task 1: open desired images for user and additionally ask if
+                         grayscale conversion is requested if rgb image is provided
 
 Assignment Information:
     Assignment:     11.2.1 Team Project Checkpoint 1 Task 1
