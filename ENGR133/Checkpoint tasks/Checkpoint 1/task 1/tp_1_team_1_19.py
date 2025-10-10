@@ -186,7 +186,7 @@ def normalize(ch_input):
         void
 
     Dependencies: 
-        none
+        requires 'pow' module from library 'math' to linearlize bright pixels
     """
     for i in range(0, len(ch_input)):
         for j in range(0, len(ch_input[0])):
