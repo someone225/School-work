@@ -60,7 +60,7 @@ def main():
     load_img(in_path)
 
 #structure to store all information regarding image data
-#pointers don't exist in python so all helper functions must be nested within the structure itself
+#pointers don't exist in python so its generally a better idea to localize helper functions to their structures
 #also its technically called a class but whatever
 class image:
     #anyways the only inputs that the below helper function requires is self,
