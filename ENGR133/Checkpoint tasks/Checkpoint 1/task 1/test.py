@@ -1,8 +1,10 @@
+from Team19CustomUtils import images
+
 def main():
 
-    a = [1, 2, 3]
-    b = [1, 2, 3]
-    print(a + b)
+    test = [ [1, 2, 3], [1,2 , 3] ]
+    b = images.a_reduce_dim(test)
+    print(b)
 
 
 if __name__ == "__main__":
