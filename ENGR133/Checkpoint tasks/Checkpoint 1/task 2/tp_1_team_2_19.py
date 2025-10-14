@@ -36,8 +36,6 @@ Academic Integrity Statement:
 """
 
 import math as m
-import numpy as np
-from PIL import Image, ImageOps
 
 from Team19CustomUtils import imageUtils, generalUtils
 #run "python3 -m pip install Team_19_Custom_Utils_Lib"
