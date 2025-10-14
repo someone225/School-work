@@ -53,8 +53,6 @@ from Team19CustomUtils import imageUtils
 #if you are getting import errors, it might be because an update has been pushed,
 #try running "pip install --upgrade Team-19-Custom-Utils-Lib" --> current release version should be 0.0.10
 
-CHANNEL_WEIGHTS = [0.2126, 0.7152, 0.0722]
-
 def main():
     path = str(input("Enter the path of the image you want to load: "))
     load_img(path)
