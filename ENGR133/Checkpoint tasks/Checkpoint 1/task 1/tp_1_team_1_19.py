@@ -47,39 +47,18 @@ workflow cases:
 
 
 from PIL import Image
+import numpy as np
 
 from Team19CustomUtils import imageUtils
 #run "python3 -m pip install Team_19_Custom_Utils_Lib"
 #if you are getting import errors, it might be because an update has been pushed,
-#try running "pip install --upgrade Team-19-Custom-Utils-Lib" --> current release version should be 0.0.11
+#try running "pip install --upgrade Team-19-Custom-Utils-Lib" --> current release version should be 0.0.13
 
 def main():
     path = str(input("Enter the path of the image you want to load: "))
-    load_img(path)
-    
-        
-#load_img has to have only one input (due to assignment requirements), so it cannot be a helper function
-#this input must be in a path, but no one said we have to do anything with it so it's just here for the sake of it
-def load_img(path):
-    """
-    loads an image
-    Args:
-        path <str>: the input path of the image
-    Returns: 
-        if image is grayscale -> void, displays linearlized grayscale image
-        if image is rgb/rgbA -> void, asks user for conversion confirmation, then displays image as requested
-        if none of the above -> void, raises IndexError
-
-    Dependencies: 
-        requires imageUtils module from library Team19CustomUtils
-    """
-    img =  imageUtils.image()
-    t = Image.open(path)
-    width = t.width // 2
-    height = t.height //2
-
+    img = imageUtils.image()
+    img.img_data = load_img(path)
     img.set_in_path(path)
-    img.set_tar_size(width, height)
     img.new_image()
 
     match img.img_data.ndim:
@@ -94,6 +73,21 @@ def load_img(path):
         case _: #default case, expecting an error in data if none above cases match
             #raise IndexError as the program is unsure if there is sufficient dimensions to index output data
             raise IndexError
+        
+    
+        
+#load_img has to have only one input (due to assignment requirements), so it cannot be a helper function
+def load_img(path:str): 
+    '''
+    args:
+        path<str> - a string representing the path of input function
+    returns:
+        a numpy array containing the information of the image
+    '''
+
+    img = Image.open(path)
+    data = np.asarray(img, dtype= np.uint8)
+    return data.copy()
 
 def handle_rgb_case(img):
     """

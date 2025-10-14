@@ -17,6 +17,7 @@ Contributors:
     Akshada, dakea@purdue
     Erdem, eamarsa@purdue
     Milagros, mmelhemb@purdue 
+    ChatGPT
 
 
     My contributor(s) helped me:
@@ -38,19 +39,63 @@ Academic Integrity Statement:
 
 import numpy as np
 import math as m
+from PIL import Image, ImageOps
+
+TGT_WIDTH = 100
+TGT_HEIGHT = 100
 
 def main():
-    return 0
-#helper i am reusing from task 1, someone pls fix idk how to import it
-#just put something down in main while you work on functions so they dont throw indent errors
+    path = str(input("Enter the path of the RGB image you want to convert to hsv: ") )
+    rgb_img = load_img(path)
+    rgb_img = clean_image(rgb_img) #using the clean image function
+    
+    
+    #user pixel coordinates
+    x_str, y_str=input("Enter the x and y coordinates of the pixel you want inspect: ").split(',')
+    #the above step gets the x, y coordinates to be inspected
+
+    x = int(x_str)
+    y = int(y_str)
+    #above two converts the strings to integers. This is because we need integer data
+    R= int(rgb_img[y, x][0])
+    G=int(rgb_img[y, x][1])
+    B=int(rgb_img[y, x][2])
+    '''rgb_img[y,x] selects the pixel at row y, column x
+    (numpy first index is vertical (y) and the seocnd is horizontal (x))
+    [0], [1], [2] pick RGB channel values respectively
+    using int() makes it so printing and later calculations will be in integers not NumPy types
+        '''
+    #RGB at x,yimg[y, x]
+    print(f" pixel: R={R}, G={G}, B={B}")
+    print(f"Converting {path} to HSV...")
+    hsv_img= convert_to_hsv(rgb_img)
+    H, S, V=map(int, hsv_img[y, x])
+
+    print(f"HSV values of the ({x}, {y}) pixel: H={H}, S={S}, V={V}")
+
+    out = Image.fromarray(hsv_img)
+    out.show()
+    
+def load_img(path:str): 
+    '''
+    args:
+        path<str> - a string representing the path of input function
+    returns:
+        data.copy <np.array> - a numpy array containing the information of the image
+                               this data is returned as a copy to eliminate read-only errors
+    '''
+    img = Image.open(path)
+    data = np.asarray(img, dtype= np.uint8)
+    return data.copy()
+
 def normalize(ch_input):
     """
     normalizes an input array according to the rgb linearlization algorithm
     Args:
-        ch_input: a 2d array containing pixel values of one rgb channel
+        ch_input <array> - a 2d array containing pixel values of one rgb channel
 
     Returns: 
-        void
+        void, modifies input data
 
     Dependencies: 
         requires 'pow' module from library 'math' to linearlize bright pixels
@@ -97,18 +142,22 @@ def rgb_to_hsv(R: int, G: int, B: int):
     v=Cmax
 
     #Scale [0,255]
-    H=int(round((hue%360)/(360*255)))
+    H=int(round((hue%360)/360*255))
     S=int(round(s*255))
     V=int(round(v*255))
 
     return H, S, V
 
-def convert_to_hsv(rgb_image: np.ndarray) -> np.ndarray:
+def convert_to_hsv(rgb_image: np.ndarray):
 
 #converting an entire rgb image to hsv image uint8 by iterating through rgb_to_hsv
-    if rgb_image.dtype != np.uint8 or rgb_image.ndim != 3 or rgb_image.shape [2] != 3:
-        raise ValueError ("expects Height x Width x 3(RGB) uint8 array")
-
+    if rgb_image.dtype != np.uint8:
+        raise ValueError ("expects 8 bit data")
+        
+    if rgb_image.ndim != 3: #Height, Width, Dimensions. RGB is 3 dimensions
+        raise ValueError ("expects array dimension of 3")
+    
+    
     img_lin=rgb_image.astype(np.float32)/255
     for i in range(3):
         normalize(img_lin[:, :, i])
@@ -116,6 +165,9 @@ def convert_to_hsv(rgb_image: np.ndarray) -> np.ndarray:
     #converting back to ints
     H, W, _ = img_lin.shape
     out=np.empty((H,W,3), dtype=np.uint8)
+    #img_lin is linearized image with values between [0,1]
+    #lin.shape gives (height, width, 3). _ ignores 3rd value as it should always be 3
+    #out is empty NumPy array in uint8 format where HSV will be stored.
 
     for y in range (H):
         for x in range (W):
@@ -125,7 +177,73 @@ def convert_to_hsv(rgb_image: np.ndarray) -> np.ndarray:
             out[y, x] = rgb_to_hsv(R, G, B)
     return out
     
+def clean_image(img):
+    """
+    cleans an image (resizes and adds borders if required)
+    Args:
+        img <np.array> - a numpy array representing the input image data
+    Returns: 
+        void, modifies input data
+    Dependencies:
+        requires ImageOps module from PIL
+        requires Library numpy
 
+    """
+    z = Image.fromarray(img)
+    i = np.asarray(z, dtype= np.uint8)
+    t = i[:,:,0] #grabs the first channel data, which is a 2d array (gray channel for grayscale and r channel for rgb)
+    zero_width, zero_height = z.size #the length of the entire 2d array is the height of the image
+    
+    state = 0
+    size_diff_ratio = 0
+    size_diff_ratio, state = get_ratio(zero_width, zero_height)
+
+
+    match state:
+        case 1: #width is greater
+            print("Resized image to (%d, " %TGT_WIDTH, "%d)" %m.floor(TGT_WIDTH * size_diff_ratio), sep = '')
+        case 2: #height is greater
+            print("Resized image to (%d, " %m.floor(TGT_HEIGHT * size_diff_ratio) , "%d)" %TGT_HEIGHT, sep = '')
+
+    new_size = (TGT_WIDTH, TGT_HEIGHT)
+    t2 = ImageOps.pad(z, new_size, color = '#000')
+    img = np.asarray(t2, dtype = np.uint8)
+    return img.copy()
+
+
+
+
+
+    '''
+    t_PIL= Image.fromarray #i added here
+    img_data = img_data.co(t)
+    t2 = ImageOps.pad(t, size, color = '#000') 
+    '''
+
+def get_ratio(num1, num2):
+    """
+    calculates the ratio between two numbers
+    Args:
+        num1: first number
+        num2: second number
+    Returns: 
+        _: the ratio between the greater and lesser number (lesser/greater)
+        state: a variable indicating which number is larger
+
+    Dependencies: 
+        None
+    """
+
+    if(num1 > num2):
+        state = 1
+        return ((num2/num1), state)
+
+    elif(num2 > num1):
+        state = 2
+        return ( (num1/num2), state)
+
+    else:
+        return 0
 
 if __name__ == "__main__":
     main()
