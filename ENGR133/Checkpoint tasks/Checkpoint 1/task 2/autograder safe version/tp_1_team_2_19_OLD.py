@@ -132,7 +132,7 @@ def clean_image(img):
         void, modifies the input class
 
     """
-    print("Image shape before cleaning: (%d, " %img.zero_width, "%d, "%img.zero_height, "%d)" %img.img_data.ndim, sep = '')
+    print("Image shape before cleaning: (%d, " %img.zero_width*2, "%d, "%img.zero_height*2, "%d)" %img.img_data.ndim, sep = '')
 
     state = 0
     size_diff_ratio = 0
@@ -140,10 +140,10 @@ def clean_image(img):
     
     match state:
         case 1: #width is greater
-            print("Resized image to (%d," %img.TGT_WIDTH, "%d)" %m.floor(img.TGT_WIDTH * size_diff_ratio), sep = '')
+            print("Resized image to: (%d," %img.TGT_WIDTH, "%d)" %m.floor(img.TGT_WIDTH * size_diff_ratio), sep = '')
         case 2: #height is greater
-            print("Resized image to (%d, " %m.floor(img.TGT_HEIGHT * size_diff_ratio) , "%d)" %img.TGT_HEIGHT, sep = '')
-    print("Image Shape after cleaning: (%d, " %img.TGT_WIDTH, "%d, " %img.TGT_HEIGHT, "%d)"%img.img_data.ndim, sep = '')
+            print("Resized image to: (%d, " %m.floor(img.TGT_HEIGHT * size_diff_ratio) , "%d)" %img.TGT_HEIGHT, sep = '')
+    print("Image sShape after cleaning: (%d, " %img.TGT_WIDTH, "%d, " %img.TGT_HEIGHT, "%d)"%img.img_data.ndim, sep = '')
 
     match img.img_data.ndim:
         case 2: #grayscale

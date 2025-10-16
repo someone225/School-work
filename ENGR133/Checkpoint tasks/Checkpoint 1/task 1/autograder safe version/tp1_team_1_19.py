@@ -7,7 +7,7 @@ Description:
                          grayscale conversion is requested if rgb image is provided
 
 Assignment Information:
-    Assignment:     11.2.1 Team Project Checkpoint 1 Task 1
+    Assignment:     tp1 team 1 - Team Project Checkpoint 1 Task 1
     Team ID:        007 - 19
     Author:         Mark Sheng, sheng65@purdue.edu
     Date:           09/10/2025
@@ -55,11 +55,10 @@ def main():
     img = image()
     img.img_data = load_img(path)
     img.set_in_path(path)
-    img.new_image()
 
+    #print(img.img_data.ndim)
     match img.img_data.ndim:
         case 2: #grayscale
-            img.get_grayscale_data()
             img.show_image()
         case 3: #rgb
             handle_rgb_case(img)
@@ -79,9 +78,6 @@ class image:
     zero_width: int
     zero_height: int
 
-    TGT_WIDTH = 100
-    TGT_HEIGHT = 100
-    size = (TGT_WIDTH, TGT_HEIGHT)
 
     def set_in_path(self, path:str):
         """
@@ -94,57 +90,12 @@ class image:
             None
         """
         self.in_path = path
-
-    def set_tar_size(self, width, height):
-        """
-        sets the output target size to map the image to
-        Args:
-            width <int>: the desired output width
-            height <int>: the desired output height
-        Returns: 
-            void
-        Dependencies: 
-            None
-        """
-        self.TGT_WIDTH = width
-        self.TGT_HEIGHT = height
-        self.size = (width, height)
-
-    def new_image(self):
-        """
-        initializes a new image class. a path must be set but target size will default to 100 with no call
-        Args:
-            none
-        Returns: 
-            void
-        Dependencies: 
-            None
-        """
-        t = Image.open(self.in_path)
-        (self.zero_width,self.zero_height) = (t.width // 2, t.height // 2)
-        t2 = ImageOps.pad(t, self.size, color = '#000')
-        self.img_data = np.asarray(t2, dtype= np.uint8)
-        self.img_data = self.img_data.copy() 
-    
-    def get_rgb_data(self):
-        for i in range(0, 3):
-            self.ch_data = np.zeros( (3, len(self.img_data), len(self.img_data[0]) ) )
-            self.ch_data[i] = self.img_data[:,:,i] / 255
-            normalize(self.ch_data[i])
-            self.img_data[:,:,i] = self.ch_data[i] * 255
-
-    
-    def get_grayscale_data(self):
-        self.ch_data = self.img_data / 255
-        normalize(self.ch_data)
-        self.img_data = self.ch_data * 255
     
     def show_image(self):
         img_out = Image.fromarray(self.img_data)
         img_out.show()
           
-def load_img(path:str): #placeholder until task 1 part is inserted
-    #path:str means the function takes 1 argument
+def load_img(path:str): 
     '''
     args:
         path<str> - a string representing the path of input function
@@ -154,7 +105,34 @@ def load_img(path:str): #placeholder until task 1 part is inserted
 
     img = Image.open(path)
     data = np.asarray(img, dtype= np.uint8)
-    return data.copy()
+    data = data.copy()
+    #print(data.shape)
+    match data.ndim:
+        case 2:
+            ch_data = data / 255
+            normalize(ch_data)
+            data = ch_data * 255
+            data = data.astype(np.uint8)
+
+        case 3:
+            data = data[:,:,:3]
+            for i in range(0, 3):
+                ch_data = np.zeros( (3, len(data), len(data[0]) ) )
+                ch_data[i] = data[:,:,i] / 255
+                normalize(ch_data[i])
+                data[:,:,i] = ch_data[i] * 255
+            data = data.astype(np.uint8)
+        case 4:
+            data = data[:,:,:3]
+            for i in range(0, 3):
+                ch_data = np.zeros( (3, len(data), len(data[0]) ) )
+                ch_data[i] = data[:,:,i] / 255
+                normalize(ch_data[i])
+                data[:,:,i] = ch_data[i] * 255
+            data = data.astype(np.uint8)
+        case _:
+            raise IndexError("Unepected dimensions in image data")
+    return data
 
 def handle_rgb_case(img):
     """
@@ -172,8 +150,7 @@ def handle_rgb_case(img):
             img.img_data = rgb_to_grayscale(img.img_data)
             img.show_image()
         case 'no':
-            img.get_rgb_data()
-            img.show_image
+            img.show_image()
         case _:
             #this is here in case the user inputs anything unexpected
             #raise ValueError as the user has inputted an unexpected value
@@ -216,16 +193,16 @@ def rgb_to_grayscale (img_array):
     """
     ch_data = [0] * 3 
     for i in range(0, len(ch_data)):
-        ch_data[i] = img_array[:,:,i] / 255
-        normalize(ch_data[i])
-        ch_data[i] = ch_data[i] * CHANNEL_WEIGHTS[i]
+        ch_data[i] = img_array[:,:,i] * CHANNEL_WEIGHTS[i]
 
     gray_values = np.zeros((len(ch_data[0]), len(ch_data[0][0])))
 
     for i in range(0, len(gray_values)):
         for j in range(0, len(gray_values[0])):
             for k in range(0, len(ch_data)):
-                gray_values[i][j] += ch_data[k][i][j] * 255 
+                gray_values[i][j] += ch_data[k][i][j] 
+    
+    gray_values = gray_values.astype(np.uint8)
 
     return gray_values
 

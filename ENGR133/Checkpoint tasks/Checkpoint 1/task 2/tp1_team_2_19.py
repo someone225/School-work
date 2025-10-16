@@ -36,6 +36,8 @@ Academic Integrity Statement:
 """
 
 import math as m
+from PIL import Image, ImageOps
+import numpy as np
 
 from Team19CustomUtils import imageUtils, generalUtils
 #run "python3 -m pip install Team_19_Custom_Utils_Lib"
@@ -55,23 +57,29 @@ def clean_image(img):
     """
     cleans an image (resizes and adds borders if required)
     Args:
-        img <class>: an imageUtils image class
+        img <np.array> - a numpy array representing the input image data
     Returns: 
-        void, modifies the input class
+        void, modifies input data
+    Dependencies:
+        requires ImageOps module from PIL
+        requires Library numpy
 
-    Dependencies: 
-        requires module imageUtils from Team19CustomUtils
-        requires module generalUtils from Team19CustomUtils
     """
     print("Image shape before cleaning: (%d, " %img.zero_width, "%d, "%img.zero_height, "%d)" %img.img_data.ndim, sep = '')
 
+    z = Image.fromarray(img)
+    i = np.asarray(z, dtype= np.uint8)
+    t = i[:,:,0] #grabs the first channel data, which is a 2d array (gray channel for grayscale and r channel for rgb)
+    zero_width, zero_height = z.size #the length of the entire 2d array is the height of the image
+    
     state = 0
     size_diff_ratio = 0
-    size_diff_ratio, state = generalUtils.get_ratio(img.zero_width, img.zero_height)
-    
+    size_diff_ratio, state = generalUtils.get_ratio(zero_width, zero_height)
+
+
     match state:
         case 1: #width is greater
-            print("Resized image to (%d," %img.TGT_WIDTH, "%d)" %m.floor(img.TGT_WIDTH * size_diff_ratio), sep = '')
+            print("Resized image to (%d, " %img.TGT_WIDTH, "%d)" %m.floor(img.TGT_WIDTH * size_diff_ratio), sep = '')
         case 2: #height is greater
             print("Resized image to (%d, " %m.floor(img.TGT_HEIGHT * size_diff_ratio) , "%d)" %img.TGT_HEIGHT, sep = '')
     print("Image Shape after cleaning: (%d, " %img.TGT_WIDTH, "%d, " %img.TGT_HEIGHT, "%d)"%img.img_data.ndim, sep = '')
