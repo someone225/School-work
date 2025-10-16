@@ -106,7 +106,7 @@ def handle_rgb_case(img):
             img.show_image()
         case 'no':
             img.get_rgb_data()
-            img.show_image
+            img.show_image()
         case _:
             #this is here in case the user inputs anything unexpected
             #raise ValueError as the user has inputted an unexpected value
