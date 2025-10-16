@@ -52,7 +52,7 @@ import numpy as np
 from Team19CustomUtils import imageUtils
 #run "python3 -m pip install Team_19_Custom_Utils_Lib"
 #if you are getting import errors, it might be because an update has been pushed,
-#try running "pip install --upgrade Team-19-Custom-Utils-Lib" --> current release version should be 0.0.13
+#try running "pip install --upgrade Team-19-Custom-Utils-Lib" --> current release version should be 0.0.14
 
 def main():
     path = str(input("Enter the path of the image you want to load: "))
