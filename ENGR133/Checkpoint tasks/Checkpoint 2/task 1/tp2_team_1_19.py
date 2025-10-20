@@ -101,19 +101,21 @@ def gaussian_filter(img_gry, stdev):
     return 0
 
 
-def get_gaussian_kernel_value(centerX, centerY, radius):
+def get_gaussian_kernel_value(centerX, centerY, radius, img_data):
     """
     calculates the values of a kernel region after a gaussian blur application
     Args:
         << centerX <int>: x-index of the center of the kernel
         << centerY <int>: y-index of the center of the kernel
         << radius <int>: half the size of the kernel - eg. how far up/down/left/right the function should scan and apply localized blurring to
+        << img_data <list | 2d>: data representing image being blurred. this must be padded beforehand
 
     Returns: 
         >> k_out <list | 2d>: values representing the values of each pixel in the kernel after blur
 
     Dependencies: 
-        ! None
+        <! Dimensionality: img_data must be 2-dimensional
+        <! Preprocessing: img_data must be padded
     """
     return 0
 
@@ -149,7 +151,7 @@ def get_combination(array):
         >> pairs <list | 2d>: array containing all possible pairs
 
     Dependencies: 
-        ! None
+        <! Dimensionality: input array must be one-dimensional
     """
     combinations = len(array) * len(array)
     pairs = [0] * combinations
