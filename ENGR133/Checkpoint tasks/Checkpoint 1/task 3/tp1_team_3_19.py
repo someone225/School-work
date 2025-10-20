@@ -3,8 +3,8 @@ Course Number: ENGR 13300
 Semester: Fall 2025
 
 Description:
-    Checkpoint 1 task 3: Converting an RGB image to its HSV counterpart 
-                         by converting a pixel UDF then entire image.
+    Checkpoint 1 task 3: convert rgb image to hsv and apply pixel-pixel transformation
+                         to the entire image.
 
 Assignment Information:
     Assignment:     11.2.3 tp1 team 3
@@ -56,19 +56,19 @@ def main():
     x = int(x_str)
     y = int(y_str)
     #above two converts the strings to integers. This is because we need integer data
-    R= int(rgb_img[y, x][0])
-    G=int(rgb_img[y, x][1])
-    B=int(rgb_img[y, x][2])
+    R= int(rgb_img[x, y][0])
+    G=int(rgb_img[x, y][1])
+    B=int(rgb_img[x, y][2])
     '''rgb_img[y,x] selects the pixel at row y, column x
     (numpy first index is vertical (y) and the seocnd is horizontal (x))
     [0], [1], [2] pick RGB channel values respectively
     using int() makes it so printing and later calculations will be in integers not NumPy types
         '''
     #RGB at x,yimg[y, x]
-    print(f" pixel: R={R}, G={G}, B={B}")
+    print(f"RGB values of the ({x}, {y}) pixel: R={R}, G={G}, B={B}")
     print(f"Converting {path} to HSV...")
     hsv_img= convert_to_hsv(rgb_img)
-    H, S, V=map(int, hsv_img[y, x])
+    H, S, V=map(int, hsv_img[x, y])
 
     print(f"HSV values of the ({x}, {y}) pixel: H={H}, S={S}, V={V}")
 
@@ -83,7 +83,7 @@ def load_img(path:str):
         data.copy <np.array> - a numpy array containing the information of the image
                                this data is returned as a copy to eliminate read-only errors
     '''
-    img = Image.open(path)
+    img = Image.open(path).convert("RGB")
     data = np.asarray(img, dtype= np.uint8)
     return data.copy()
 
@@ -147,6 +147,16 @@ def rgb_to_hsv(R: int, G: int, B: int):
 
     return H, S, V
 
+#def u8_issue(v: float):
+    """helper function to fix uint8 issue in rounding
+    returns int ready for np.uint8 conversion"""
+    if v<0:
+        return 0
+    elif v>255:
+        return np.uint8(255)
+    else:
+        return np.uint8(int(v))
+    
 def convert_to_hsv(rgb_image: np.ndarray):
 
 #converting an entire rgb image to hsv image uint8 by iterating through rgb_to_hsv
@@ -157,67 +167,38 @@ def convert_to_hsv(rgb_image: np.ndarray):
         raise ValueError ("expects array dimension of 3")
     
     
-    img_lin=rgb_image.astype(np.float32)/255
+    '''img_lin=rgb_image.astype(np.float32)/255
     for i in range(3):
-        normalize(img_lin[:, :, i])
-
-    #converting back to ints
-    H, W, _ = img_lin.shape
-    out=np.empty((H,W,3), dtype=np.uint8)
-    #img_lin is linearized image with values between [0,1]
+        normalize(img_lin[:, :, i])'''
+#img_lin is linearized image with values between [0,1]
     #lin.shape gives (height, width, 3). _ ignores 3rd value as it should always be 3
     #out is empty NumPy array in uint8 format where HSV will be stored.
+    #converting back to ints
+    H, W, _ = rgb_image.shape
+    out=np.empty((H,W,3), dtype=np.uint8)
+    
 
-    for y in range (H):
-        for x in range (W):
-            R=int(round(img_lin[y, x, 0]*255))
-            G=int(round(img_lin[y, x, 1]*255))
-            B=int(round(img_lin[y, x, 2]*255))
-            out[y, x] = rgb_to_hsv(R, G, B)
+    for x in range (H):
+        for y in range (W):
+            R=int(rgb_image[x, y, 0])
+            G=int(rgb_image[x, y, 1])
+            B=int(rgb_image[x, y, 2])
+            h, s, v = rgb_to_hsv(R, G, B)
+            out[x, y] = int(h), int(s), int(v)
     return out
+
     
 def clean_image(img):
-    """
-    cleans an image (resizes and adds borders if required)
-    Args:
-        img <np.array> - a numpy array representing the input image data
-    Returns: 
-        void, modifies input data
-    Dependencies:
-        requires ImageOps module from PIL
-        requires Library numpy
+    t=Image.fromarray(img)
+    w, h =t.size
+    scale=min(TGT_WIDTH/w, TGT_HEIGHT/h)
+    new_w=int(m.floor(w*scale))
+    new_h=int(m.floor(h*scale))
+    print(f"Resized image to: ({new_h}, {new_w})")
 
-    """
-    z = Image.fromarray(img)
-    i = np.asarray(z, dtype= np.uint8)
-    t = i[:,:,0] #grabs the first channel data, which is a 2d array (gray channel for grayscale and r channel for rgb)
-    zero_width, zero_height = z.size #the length of the entire 2d array is the height of the image
-    
-    state = 0
-    size_diff_ratio = 0
-    size_diff_ratio, state = get_ratio(zero_width, zero_height)
-
-
-    match state:
-        case 1: #width is greater
-            print("Resized image to (%d, " %TGT_WIDTH, "%d)" %m.floor(TGT_WIDTH * size_diff_ratio), sep = '')
-        case 2: #height is greater
-            print("Resized image to (%d, " %m.floor(TGT_HEIGHT * size_diff_ratio) , "%d)" %TGT_HEIGHT, sep = '')
-
-    new_size = (TGT_WIDTH, TGT_HEIGHT)
-    t2 = ImageOps.pad(z, new_size, color = '#000')
-    img = np.asarray(t2, dtype = np.uint8)
-    return img.copy()
-
-
-
-
-
-    '''
-    t_PIL= Image.fromarray #i added here
-    img_data = img_data.co(t)
-    t2 = ImageOps.pad(t, size, color = '#000') 
-    '''
+    t=t.resize((new_w, new_h), resample=Image.BILINEAR)
+    t_padded=ImageOps.pad(t, (TGT_WIDTH, TGT_HEIGHT), color="#000")
+    return np.asarray(t_padded, dtype=np.uint8).copy()
 
 def get_ratio(num1, num2):
     """
