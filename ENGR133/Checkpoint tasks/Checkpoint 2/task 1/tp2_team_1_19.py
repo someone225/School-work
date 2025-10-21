@@ -33,13 +33,23 @@ Academic Integrity Statement:
 
 import numpy as np
 import math as m
-from PIL import Image, ImageOps
+from PIL import Image, ImageOps, ImageFilter
 
 
 def main():
+    
     test = [-2, -1, 0, 1, 2]
-    print(get_combination(test))
-    return 0
+
+    image_path = input("Enter the path to the image file: ")
+    data = load_img(image_path)
+    data_gry = rgb_to_grayscale(data)
+    img_out_data = gaussian_filter(data_gry, 3)
+    img_out = Image.fromarray(img_out_data)
+    img_out.show()
+
+
+
+
 
 
 
@@ -75,7 +85,7 @@ def rgb_to_grayscale (img_array):
     return gray_values
 
 
-def gaussian_filter(img_gry, stdev):
+def gaussian_filter_manual(img_gry, stdev):
     """
     applies a gaussian blur to input grayscale data
     Args:
@@ -100,6 +110,30 @@ def gaussian_filter(img_gry, stdev):
 
     return 0
 
+def gaussian_filter(img_gry, stdev):
+    """
+    applies a gaussian blur to input grayscale data using the PIL gaussianblur function
+    Args:
+        << img_gry <list | 2d | numpy.uint8>: array representing grayscale image data
+        << stdev <int>: number influencing kernel (target area) size
+    Returns: 
+        >> img_out <list | 2d | numpy.uint8>: array representing blurred grayscale image data
+
+    Dependencies: 
+        !! Requires modules 'Image' 'ImageOps', and 'ImageFilter' from library 'PIL'
+        <! Requires rgb inputs to be converted to grayscale
+    """
+
+    t = Image.fromarray(img_gry)
+    kernel_size = 2 * 3 * m.ceil(stdev) + 1
+    new_t = ImageOps.pad(t, (t.width + kernel_size, t.height + kernel_size), color = '#000')
+
+    new_t = new_t.filter(ImageFilter.GaussianBlur(radius = stdev))
+
+    img_out = np.asarray(new_t, dtype= np.uint8)
+    return img_out
+
+
 
 def get_gaussian_kernel_value(centerX, centerY, radius, img_data):
     """
@@ -117,6 +151,19 @@ def get_gaussian_kernel_value(centerX, centerY, radius, img_data):
         <! Dimensionality: img_data must be 2-dimensional
         <! Preprocessing: img_data must be padded
     """
+
+    #initialize scan boundaries
+    scan_start_index_x = centerX - radius
+    scan_start_index_y = centerY - radius
+
+    scan_end_index_x = centerX + radius
+    scan_end_index_y = centerY + radius
+
+    for x in range(scan_end_index_x, scan_start_index_x):
+        for y in range(scan_start_index_y, scan_end_index_y):
+            img_data[x][y] = get_gaussian_weight(x, y, centerX, centerY)
+
+
     return 0
 
 def get_gaussian_weight(xPos, yPos, xRef, yRef):
@@ -165,6 +212,66 @@ def get_combination(array):
 
 
     return combinations, pairs
+
+def load_img(path:str): 
+    '''
+    args:
+        path<str> - a string representing the path of input function
+    returns:
+        a numpy array containing the information of the image
+    '''
+
+    img = Image.open(path)
+    data = np.asarray(img, dtype= np.uint8)
+    data = data.copy()
+    #print(data.shape)
+    match data.ndim:
+        case 2:
+            ch_data = data / 255
+            normalize(ch_data)
+            data = ch_data * 255
+            data = data.astype(np.uint8)
+
+        case 3:
+            data = data[:,:,:3]
+            for i in range(0, 3):
+                ch_data = np.zeros( (3, len(data), len(data[0]) ) )
+                ch_data[i] = data[:,:,i] / 255
+                normalize(ch_data[i])
+                data[:,:,i] = ch_data[i] * 255
+            data = data.astype(np.uint8)
+        case 4:
+            data = data[:,:,:3]
+            for i in range(0, 3):
+                ch_data = np.zeros( (3, len(data), len(data[0]) ) )
+                ch_data[i] = data[:,:,i] / 255
+                normalize(ch_data[i])
+                data[:,:,i] = ch_data[i] * 255
+            data = data.astype(np.uint8)
+        case _:
+            raise IndexError("Unepected dimensions in image data")
+    return data
+
+def normalize(ch_input):
+    """
+    normalizes an input array according to the rgb linearlization algorithm
+    Args:
+        ch_input: a 2d array containing pixel values of one rgb channel
+
+    Returns: 
+        void
+
+    Dependencies: 
+        requires 'pow' module from library 'math' to linearlize bright pixels
+    """
+    for i in range(0, len(ch_input)):
+        for j in range(0, len(ch_input[0])):
+            if(ch_input[i][j] <= 0.0405):
+                ch_input[i][j] = ch_input[i][j] / 12.92
+            else:
+                ch_input[i][j] = m.pow( ((ch_input[i][j] + 0.055)/1.055), 2.4 )  
+
+
 
 if __name__ == "__main__":
     main()
