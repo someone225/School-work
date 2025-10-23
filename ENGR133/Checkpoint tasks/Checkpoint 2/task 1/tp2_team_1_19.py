@@ -43,9 +43,10 @@ def main():
     image_path = input("Enter the path to the image file: ")
     data = load_img(image_path)
     data_gry = rgb_to_grayscale(data)
-    img_out_data = gaussian_filter(data_gry, 3)
+    img_out_data = gaussian_filter_manual(data_gry, 1)
     img_out = Image.fromarray(img_out_data)
     img_out.show()
+
 
 
 
@@ -99,16 +100,30 @@ def gaussian_filter_manual(img_gry, stdev):
         <! Requires rgb inputs to be converted to grayscale
     """
     kernel_size = 2 * 3 * m.ceil(stdev) + 1
+    radius = m.floor(kernel_size/2) #round down insted of up as radius counts away from the center pixel (ie kernel size 5 should have radius 2, size 7 should have radius 3, etc)
 
     t = Image.fromarray(img_gry)
+    h0 = t.height
+    w0 = t.width
+
     new_t = ImageOps.pad(t, (t.width + kernel_size, t.height + kernel_size), color = '#000')
-    scan_start_xPos = 3 * m.ceil(stdev) - 1
-    scan_start_yPos = 3 * m.ceil(stdev) - 1
- 
+    img_out = np.asarray(new_t)
+    print(img_out)
+    img_out = img_out.copy()
+
+    scan_xPos_start = 3 * m.ceil(stdev)  #padding is 3 standard deviations of border on each side, the next index is where the center of the first kernel is
+    scan_yPos_start = 3 * m.ceil(stdev) 
+    scan_xPos_end = h0
+    scan_yPos_end = w0
+
+    for y in range(scan_yPos_start, scan_yPos_end):
+        for x in range(scan_xPos_start, scan_xPos_end):
+            
+            get_gaussian_kernel_value(x, y, radius, img_out)
 
 
 
-    return 0
+    return img_out
 
 def gaussian_filter(img_gry, stdev):
     """
@@ -145,7 +160,7 @@ def get_gaussian_kernel_value(centerX, centerY, radius, img_data):
         << img_data <list | 2d>: data representing image being blurred. this must be padded beforehand
 
     Returns: 
-        >> k_out <list | 2d>: values representing the values of each pixel in the kernel after blur
+        >> void, modifies input data
 
     Dependencies: 
         <! Dimensionality: img_data must be 2-dimensional
@@ -159,12 +174,33 @@ def get_gaussian_kernel_value(centerX, centerY, radius, img_data):
     scan_end_index_x = centerX + radius
     scan_end_index_y = centerY + radius
 
-    for x in range(scan_end_index_x, scan_start_index_x):
+    mean = 0
+    possible_combinations = (scan_end_index_x - scan_start_index_x) * (scan_end_index_y - scan_start_index_y)
+
+
+    sum = 0
+
+
+    for x in range(scan_start_index_x, scan_end_index_x):
         for y in range(scan_start_index_y, scan_end_index_y):
-            img_data[x][y] = get_gaussian_weight(x, y, centerX, centerY)
+
+            sum += int(img_data[x][y])
 
 
-    return 0
+
+    mean = (sum /possible_combinations) 
+    print(mean)
+
+
+    
+
+
+    for x in range(scan_start_index_x, scan_end_index_x):
+        for y in range(scan_start_index_y, scan_end_index_y):
+            img_data[x][y] = mean * get_gaussian_weight(x, y, centerX, centerY)
+
+
+    
 
 def get_gaussian_weight(xPos, yPos, xRef, yRef):
     """
@@ -181,10 +217,10 @@ def get_gaussian_weight(xPos, yPos, xRef, yRef):
     Dependencies: 
         ! requires library 'math' for valid calculations
     """
-    dx = xRef - xPos
-    dy = yRef - yPos
+    dx = xPos - xRef
+    dy = yPos - yRef
 
-    weight = 1/(2 * m.pi()) * m.pow( m.e(), (-1 * (dx * dx + dy * dy) / 2 ) )
+    weight = 1/(2 * m.pi) * m.pow( m.e, (-1 * (dx * dx + dy * dy) / 2 ) )
     return weight
 
 def get_combination(array):
@@ -270,7 +306,6 @@ def normalize(ch_input):
                 ch_input[i][j] = ch_input[i][j] / 12.92
             else:
                 ch_input[i][j] = m.pow( ((ch_input[i][j] + 0.055)/1.055), 2.4 )  
-
 
 
 if __name__ == "__main__":
