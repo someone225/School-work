@@ -1,18 +1,25 @@
 """
 Course Number: ENGR 13300
-Semester: e.g. Spring 2025
+Semester: Fall 2025
 
 Description:
     Replace this line with a description of your program.
 
 Assignment Information:
-    Assignment:     e.g. 7.2.1 Py1 Team 1 (for Python 1 Team task 1)
-    Team ID:        ### - ## (e.g. LC1 - 01; for section LC1, team 01)
-    Author:         Name, login@purdue.edu
+    Assignment:     tp2 team 1 - checkpoint 2 team task 1
+    Team ID:        007 - 19 (e.g. LC1 - 01; for section LC1, team 01)
+    Author:         Mark, sheng65@purdue.edu
     Date:           e.g. 01/23/2025
 
 Contributors:
-    Name, login@purdue [repeat for each]
+    Mark, sheng65@purdue [repeat for each]
+    Akshada, dakea@purdue
+    Erdem, eamarsa@purdue
+    Milagros, mmelhemb@purdue 
+
+    documentation used: 
+    python numpy API referance https://numpy.org/doc/stable/reference/index.html
+    python PIL documentation https://pillow.readthedocs.io/en/stable/ 
 
     My contributor(s) helped me:
     [ ] understand the assignment expectations without
@@ -33,7 +40,7 @@ Academic Integrity Statement:
 
 import numpy as np
 import math as m
-from PIL import Image, ImageOps, ImageFilter
+from PIL import Image, ImageOps
 
 
 def main():
@@ -41,7 +48,8 @@ def main():
     image_path = input("Enter the path to the image file: ")
     data = load_img(image_path)
     data_gry = rgb_to_grayscale(data)
-    img_out = gaussian_filter_manual(data_gry, 3)
+    #img_out = np.pad(data_gry, pad_width = ((3, 3), (3, 3)), mode='constant', constant_values=0 )
+    img_out = gaussian_filter(data_gry, 1)
     output = Image.fromarray(img_out)
     output.show()
     
@@ -85,7 +93,7 @@ def rgb_to_grayscale (img_array):
     return gray_values
 
 
-def gaussian_filter_manual(img_gry, stdev):
+def gaussian_filter(img_gry, stdev):
     """
     applies a gaussian blur to input grayscale data
     Args:
@@ -98,60 +106,25 @@ def gaussian_filter_manual(img_gry, stdev):
         !! Requires modules 'Image' and 'ImageOps' from library 'PIL'
         <! Requires rgb inputs to be converted to grayscale
     """
-    kernel_size = 2 * 3 * m.ceil(stdev) + 1
-    radius = m.floor(kernel_size/2) #round down insted of up as radius counts away from the center pixel (ie kernel size 5 should have radius 2, size 7 should have radius 3, etc)
+    kernel_size = 2 * m.ceil(3 * stdev) + 1
 
-    t = Image.fromarray(img_gry)
-    h0 = t.height
-    w0 = t.width
+    img_unpadded = img_gry
 
-    
 
-    
-    img_unpadded = np.asarray(t)
-    img_out = np.zeros_like(img_unpadded)
-    ref_img = np.pad(img_unpadded, pad_width= radius, mode='constant', constant_values = 0)
-    #i_ref = ImageOps.pad(t, (w0 + kernel_size, h0 + kernel_size), color = '#000')
-    #ref_img = np.asarray(i_ref)
-    #ref_img = ref_img.copy()
-
-    kernel_data = get_gaussian_kernel_weights(radius)
-    img_out = f_convolve(ref_img,kernel_data, h0, w0)
+    kernel_data = get_gaussian_kernel_weights(kernel_size)
+    img_out = f_convolve(img_unpadded,kernel_data, kernel_size)
 
     return img_out
 
-def gaussian_filter(img_gry, stdev):
-    """
-    applies a gaussian blur to input grayscale data using the PIL gaussianblur function
-    Args:
-        << img_gry <list | 2d | numpy.uint8>: array representing grayscale image data
-        << stdev <int>: number influencing kernel (target area) size
-    Returns: 
-        >> img_out <list | 2d | numpy.uint8>: array representing blurred grayscale image data
-
-    Dependencies: 
-        !! Requires modules 'Image' 'ImageOps', and 'ImageFilter' from library 'PIL'
-        <! Requires rgb inputs to be converted to grayscale
-    """
-
-    t = Image.fromarray(img_gry)
-    kernel_size = 2 * 3 * m.ceil(stdev) + 1
-    new_t = ImageOps.pad(t, (t.width + kernel_size, t.height + kernel_size), color = '#000')
-
-    new_t = new_t.filter(ImageFilter.GaussianBlur(radius = stdev))
-
-    img_out = np.asarray(new_t, dtype= np.uint8)
-    return img_out
 
 
-
-def get_gaussian_kernel_weights(radius):
+def get_gaussian_kernel_weights(k_size):
     """
     calculates the weights of a kernel region for a gaussian blur application
     Args:
         << centerX <int>: x-index of the center of the kernel
         << centerY <int>: y-index of the center of the kernel
-        << radius <int>: half the size of the kernel - eg. how far up/down/left/right the function should scan and apply localized blurring to
+        << k_size <int>: size of the kernel
         << img_data <list | 2d>: data representing image being blurred. this must be padded beforehand
 
     Returns: 
@@ -162,98 +135,51 @@ def get_gaussian_kernel_weights(radius):
         <! Preprocessing: img_data must be padded
     """
 
- 
-    sum_weight = 0
-   
-
-    #size of the kernel is w = 2 * radius + 1, L = 2 * radius + 1
-    w = 2 * radius + 1
-    l = 2 * radius + 1
-    centerX = w // 2
-    centerY = w // 2
-    weights = np.zeros((w , l))
-
-    #initialize scan boundaries
-    scan_start_index_x = centerX - radius
-    scan_start_index_y = centerY - radius
-
-    scan_end_index_x = centerX + radius
-    scan_end_index_y = centerY + radius
 
 
+    kernel = np.zeros((k_size, k_size))
+    center = k_size // 2 #normally the center would be found by rounding up, but it is rounded down here because of indexing
+    for x in range(0, k_size):
+        for y in range(0, k_size):
+            dx = x - center
+            dy = x - center
+            kernel[x, y] = (1/(2 * m.pi) ) * m.exp( (-1 * (  (dx ** 2) + (dy ** 2) ) / 2 ) )
+    weights = kernel / np.sum(kernel)
+    return weights 
     
 
-
-    i = 0
-    j = 0
-
-
-    for x in range(scan_start_index_x, scan_end_index_x + 1):
-        j = 0
-        for y in range(scan_start_index_y, scan_end_index_y + 1):
-            weights[i][j] =  get_gaussian_weight(x, y, centerX, centerY)
-            sum_weight += weights[i][j]
-            j += 1
-
-        i += 1
-    #normalize weights
-    for x in range(0, len(weights)):
-        for y in range(0, len(weights[0])):
-            weights[x][y] = weights[x][y] / sum_weight
-            #print(" weight: %.2f" %weights[x][y], sep = '')
-
-    return weights
-    
-
-def f_convolve(f_img, f_kernel, zero_height, zero_width):
+def f_convolve(f_img, f_kernel, k_size):
     """
     performs a convolution of two matrix functions
     Args:
-        << f_img  <list | 2d>: image data. must be padded beforehand
+        << f_img  <list | 2d>: image data
         << f_kernel <list | 2d>: data of currently interested kernel
-        << zero_height <int>: unpadded height of image
-        << zero_width <int>: unpadded width of image
+        << k_size <int>: size of the kernel
 
     Returns: 
         >> f_out <list | 2d>: result of the convolution
 
     Dependencies: 
-        ! func_img must be padded before call
+        ! k_size must be odd
     """
 
-    f_out = np.zeros_like(f_img)
-    k_height, k_width = f_kernel.shape
-    for y in range(0, zero_height):
-        for x in range(0, zero_width):
-            tar_reg = f_img[y : y + k_height, x : x+k_width]
-            f_out[y][x] = np.sum(tar_reg * f_kernel)
+
+
+    radius = k_size // 2
+    
+    f_rows, f_cols = f_img.shape
+    k_rows, k_cols = f_kernel.shape
+
+    f_padded = np.pad(f_img, pad_width = radius, mode='symmetric' )
+
+    f_out = np.zeros_like(f_padded)
+    for r in range(f_rows):
+        for c in range(f_cols):
+            tar_reg = f_padded[r : r + k_rows, c : c + k_cols ]
+            f_out[r + radius][c + radius] = np.sum(tar_reg * f_kernel)
 
     return f_out
 
-    
-
-def get_gaussian_weight(xPos, yPos, xRef, yRef):
-    """
-    calculates the weight of a select pixel according to gaussian blurring algorithm
-    Args:
-        << xPos <int>: x-index of the current relative position
-        << yPos <int>: y-index of the current relative position
-        << xRef <int>: x-index of the referance position
-        << yRef <int>: y-index of the referance position
-
-    Returns: 
-        >> weight <float>: the weight of the current relative position to apply blur to
-
-    Dependencies: 
-        ! requires library 'math' for valid calculations
-    """
-    dx = xPos - xRef
-    dy = yPos - yRef
-
-    #print(dy)
-    v = (-1 * (  (dx ** 2) + (dy ** 2) ) / 2 )
-    weight = (1/(2 * m.pi) ) * m.exp( v )
-    return weight
 
 def get_combination(array):
     """
