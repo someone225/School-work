@@ -38,14 +38,13 @@ from PIL import Image, ImageOps, ImageFilter
 
 def main():
     
-    test = [-2, -1, 0, 1, 2]
-
     image_path = input("Enter the path to the image file: ")
     data = load_img(image_path)
     data_gry = rgb_to_grayscale(data)
-    img_out_data = gaussian_filter_manual(data_gry, 1)
-    img_out = Image.fromarray(img_out_data)
-    img_out.show()
+    img_out = gaussian_filter_manual(data_gry, 3)
+    output = Image.fromarray(img_out)
+    output.show()
+    
 
 
 
@@ -106,22 +105,18 @@ def gaussian_filter_manual(img_gry, stdev):
     h0 = t.height
     w0 = t.width
 
-    new_t = ImageOps.pad(t, (t.width + kernel_size, t.height + kernel_size), color = '#000')
-    img_out = np.asarray(new_t)
-    print(img_out)
-    img_out = img_out.copy()
+    
 
-    scan_xPos_start = 3 * m.ceil(stdev)  #padding is 3 standard deviations of border on each side, the next index is where the center of the first kernel is
-    scan_yPos_start = 3 * m.ceil(stdev) 
-    scan_xPos_end = h0
-    scan_yPos_end = w0
+    
+    img_unpadded = np.asarray(t)
+    img_out = np.zeros_like(img_unpadded)
+    ref_img = np.pad(img_unpadded, pad_width= radius, mode='constant', constant_values = 0)
+    #i_ref = ImageOps.pad(t, (w0 + kernel_size, h0 + kernel_size), color = '#000')
+    #ref_img = np.asarray(i_ref)
+    #ref_img = ref_img.copy()
 
-    for y in range(scan_yPos_start, scan_yPos_end):
-        for x in range(scan_xPos_start, scan_xPos_end):
-            
-            get_gaussian_kernel_value(x, y, radius, img_out)
-
-
+    kernel_data = get_gaussian_kernel_weights(radius)
+    img_out = f_convolve(ref_img,kernel_data, h0, w0)
 
     return img_out
 
@@ -150,9 +145,9 @@ def gaussian_filter(img_gry, stdev):
 
 
 
-def get_gaussian_kernel_value(centerX, centerY, radius, img_data):
+def get_gaussian_kernel_weights(radius):
     """
-    calculates the values of a kernel region after a gaussian blur application
+    calculates the weights of a kernel region for a gaussian blur application
     Args:
         << centerX <int>: x-index of the center of the kernel
         << centerY <int>: y-index of the center of the kernel
@@ -160,12 +155,23 @@ def get_gaussian_kernel_value(centerX, centerY, radius, img_data):
         << img_data <list | 2d>: data representing image being blurred. this must be padded beforehand
 
     Returns: 
-        >> void, modifies input data
+        >> weights <list | 2d>: data representing the weights of a target kernel centered around (centerX, centerY) 
 
     Dependencies: 
         <! Dimensionality: img_data must be 2-dimensional
         <! Preprocessing: img_data must be padded
     """
+
+ 
+    sum_weight = 0
+   
+
+    #size of the kernel is w = 2 * radius + 1, L = 2 * radius + 1
+    w = 2 * radius + 1
+    l = 2 * radius + 1
+    centerX = w // 2
+    centerY = w // 2
+    weights = np.zeros((w , l))
 
     #initialize scan boundaries
     scan_start_index_x = centerX - radius
@@ -174,31 +180,55 @@ def get_gaussian_kernel_value(centerX, centerY, radius, img_data):
     scan_end_index_x = centerX + radius
     scan_end_index_y = centerY + radius
 
-    mean = 0
-    possible_combinations = (scan_end_index_x - scan_start_index_x) * (scan_end_index_y - scan_start_index_y)
-
-
-    sum = 0
-
-
-    for x in range(scan_start_index_x, scan_end_index_x):
-        for y in range(scan_start_index_y, scan_end_index_y):
-
-            sum += int(img_data[x][y])
-
-
-
-    mean = (sum /possible_combinations) 
-    print(mean)
-
 
     
 
 
-    for x in range(scan_start_index_x, scan_end_index_x):
-        for y in range(scan_start_index_y, scan_end_index_y):
-            img_data[x][y] = mean * get_gaussian_weight(x, y, centerX, centerY)
+    i = 0
+    j = 0
 
+
+    for x in range(scan_start_index_x, scan_end_index_x + 1):
+        j = 0
+        for y in range(scan_start_index_y, scan_end_index_y + 1):
+            weights[i][j] =  get_gaussian_weight(x, y, centerX, centerY)
+            sum_weight += weights[i][j]
+            j += 1
+
+        i += 1
+    #normalize weights
+    for x in range(0, len(weights)):
+        for y in range(0, len(weights[0])):
+            weights[x][y] = weights[x][y] / sum_weight
+            #print(" weight: %.2f" %weights[x][y], sep = '')
+
+    return weights
+    
+
+def f_convolve(f_img, f_kernel, zero_height, zero_width):
+    """
+    performs a convolution of two matrix functions
+    Args:
+        << f_img  <list | 2d>: image data. must be padded beforehand
+        << f_kernel <list | 2d>: data of currently interested kernel
+        << zero_height <int>: unpadded height of image
+        << zero_width <int>: unpadded width of image
+
+    Returns: 
+        >> f_out <list | 2d>: result of the convolution
+
+    Dependencies: 
+        ! func_img must be padded before call
+    """
+
+    f_out = np.zeros_like(f_img)
+    k_height, k_width = f_kernel.shape
+    for y in range(0, zero_height):
+        for x in range(0, zero_width):
+            tar_reg = f_img[y : y + k_height, x : x+k_width]
+            f_out[y][x] = np.sum(tar_reg * f_kernel)
+
+    return f_out
 
     
 
@@ -220,7 +250,9 @@ def get_gaussian_weight(xPos, yPos, xRef, yRef):
     dx = xPos - xRef
     dy = yPos - yRef
 
-    weight = 1/(2 * m.pi) * m.pow( m.e, (-1 * (dx * dx + dy * dy) / 2 ) )
+    #print(dy)
+    v = (-1 * (  (dx ** 2) + (dy ** 2) ) / 2 )
+    weight = (1/(2 * m.pi) ) * m.exp( v )
     return weight
 
 def get_combination(array):
