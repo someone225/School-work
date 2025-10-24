@@ -48,10 +48,10 @@ def main():
     image_path = input("Enter the path to the image file: ")
     data = load_img(image_path)
     data_gry = rgb_to_grayscale(data)
-    #img_out = np.pad(data_gry, pad_width = ((3, 3), (3, 3)), mode='constant', constant_values=0 )
     img_out = gaussian_filter(data_gry, 1)
     output = Image.fromarray(img_out)
     output.show()
+
     
 
 
@@ -88,7 +88,8 @@ def rgb_to_grayscale (img_array):
             for k in range(0, len(ch_data)):
                 gray_values[i][j] += ch_data[k][i][j] 
     
-    gray_values = gray_values.astype(np.uint8)
+    #normalize(gray_values)
+    
 
     return gray_values
 
@@ -106,19 +107,17 @@ def gaussian_filter(img_gry, stdev):
         !! Requires modules 'Image' and 'ImageOps' from library 'PIL'
         <! Requires rgb inputs to be converted to grayscale
     """
+
     kernel_size = 2 * m.ceil(3 * stdev) + 1
 
-    img_unpadded = img_gry
-
-
-    kernel_data = get_gaussian_kernel_weights(kernel_size)
-    img_out = f_convolve(img_unpadded,kernel_data, kernel_size)
+    kernel_data = get_gaussian_kernel_weights(kernel_size, stdev)
+    img_out = f_convolve(img_gry,kernel_data, kernel_size)
 
     return img_out
 
 
 
-def get_gaussian_kernel_weights(k_size):
+def get_gaussian_kernel_weights(k_size, stdev):
     """
     calculates the weights of a kernel region for a gaussian blur application
     Args:
@@ -134,16 +133,13 @@ def get_gaussian_kernel_weights(k_size):
         <! Dimensionality: img_data must be 2-dimensional
         <! Preprocessing: img_data must be padded
     """
-
-
-
     kernel = np.zeros((k_size, k_size))
     center = k_size // 2 #normally the center would be found by rounding up, but it is rounded down here because of indexing
     for x in range(0, k_size):
         for y in range(0, k_size):
             dx = x - center
-            dy = x - center
-            kernel[x, y] = (1/(2 * m.pi) ) * m.exp( (-1 * (  (dx ** 2) + (dy ** 2) ) / 2 ) )
+            dy = y - center
+            kernel[x, y] = (1/(2 * m.pi * stdev**2) ) * m.exp( (-1 * (  (dx ** 2) + (dy ** 2) ) / 2 * stdev**2 ) )
     weights = kernel / np.sum(kernel)
     return weights 
     
@@ -157,26 +153,26 @@ def f_convolve(f_img, f_kernel, k_size):
         << k_size <int>: size of the kernel
 
     Returns: 
-        >> f_out <list | 2d>: result of the convolution
+        >> img_out <list | 2d>: result of the convolution
 
     Dependencies: 
         ! k_size must be odd
     """
-
-
-
     radius = k_size // 2
     
     f_rows, f_cols = f_img.shape
     k_rows, k_cols = f_kernel.shape
 
-    f_padded = np.pad(f_img, pad_width = radius, mode='symmetric' )
 
-    f_out = np.zeros_like(f_padded)
+    f_padded = np.pad(f_img, pad_width = radius, mode='symmetric' )
+    #add pad to push convolution as otherwise matrix sizes will not match at edges
+
+    f_out = np.zeros_like(f_img)
     for r in range(f_rows):
         for c in range(f_cols):
             tar_reg = f_padded[r : r + k_rows, c : c + k_cols ]
-            f_out[r + radius][c + radius] = np.sum(tar_reg * f_kernel)
+            f_out[r][c ] = np.sum(tar_reg * f_kernel)
+
 
     return f_out
 
