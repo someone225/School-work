@@ -40,7 +40,7 @@ def main():
 
 
 
-def calculate_sigmoid(z):
+def calculate_sigmoid(z: any):
     #class 3 function (substack helper)
     """
     calculates the position of an input z according to a rational normalization function
@@ -59,7 +59,7 @@ def calculate_sigmoid(z):
     
     return output
 
-def predict_proba(X, w, b):
+def predict_proba(X: list, w: list, b: float):
     #class 2 function (stack helper)
     """
     calculates the probability for all examples in a dataset
@@ -84,8 +84,8 @@ def predict_proba(X, w, b):
     print(np.shape(z))
     return z
 
-def predict_labels(X, w, b, threshold = 0.5):
-    #class 1 function (main call function)
+def predict_labels(X: list, w: list, b: float, threshold = 0.5):
+    #class 3 function (substack helper)
     """
     converts probabilities to binary class labels (0 or 1)
     args:
@@ -111,6 +111,125 @@ def predict_labels(X, w, b, threshold = 0.5):
     
     return z
 
+def compute_loss_and_grads(X: list, y_true: list, w: list, b: float):
+    #class 2 function (stack helper)
+    """
+    calculates and applies gradient loss to input data
+    args:
+        X (2d arr): feature matrix in which len(X) returns the number of examples and len(X[0]) returns the number of features
+        y_true (1d arr): true label values
+        w (1d arr): weight vector where len(w) matches with len(X[0])
+        b (float): bias factor
+    returns:
+        loss (float): a loss value indicating the inaccuracy of the model
+        dw (1d arr): step distance of weight vectors
+        db (float): step distance of bias
+    """
+    y_pred = predict_labels(X, w, b)
+    loss = get_loss(y_true, y_pred)
+    
+    temp1, temp2, dw, db = gradient_loss(X, w, b, y_true)
+
+    return loss, dw, db
+
+def get_loss(y_true: list, y_pred: list):
+    #class 3 function (substack helper)
+    """
+    calculates the loss by comparing true y to predicted y
+    args:
+        y_true (1d arr): true label of input values
+        y_pred (1d arr): predicted labels of values
+    returns:
+        loss (float): multi-vector loss sum for the entire dataset
+    """
+    m = len(y_true)
+    loss = -1 * 1/m
+    sum = 0
+    for i in range(0, m):
+        sum += y_true[i] * m.log(y_pred[i], 10) + (1 - y_true[i]) * m.log((1-y_pred[i]), 10)
+
+    loss += sum
+    return loss
+
+def gradient_loss(X: list, w: list, b: float, y_true: list):
+    #class 3 function (substack helper)
+    """
+    updates the values of w and b according to gradient loss function
+    args:
+        X (2d arr): feature matrix in which len(X) returns the number of examples and len(X[0]) returns the number of features
+        w (1d arr): weight vector array
+        b (float): bias factor
+        y_true (1d arr): true label of input values
+    returns:
+        w (1d arr): adjusted weight vector array
+        b (float): adjusted bias factor
+        dL_w (1d arr): step distance of weight vector array
+        dL_b (float): step distance of bias factor
+
+    """
+
+
+    y_pred = predict_labels(X, w, b)
+    a = 0.001
+    X_t = transpose_matrix(X)
+    m = len(X)
+    dL_w = 1/m * X_t @ (y_pred - y_true)
+    dL_b = 1/m 
+    dsum = 0
+    for i in range(0, len(y_true)):
+        dsum += (y_pred[i] - y_true[i])
+    dL_b *= dsum
+    
+    w -= (a * dL_w)
+    b -= (a * dL_b)
+
+    return w, b, dL_w, dL_b
+    
+
+def transpose_matrix(input: list):
+    #class N function (general helper)
+    """
+    transposes an input matrix
+    args:
+        input (2d arr): input matrix which will be transposed
+    returns:
+        m_transposed (2d arr): transposition of input matrix
+    """
+    m_transposed = input.copy()
+    for i in range(0, len(input)):
+        for j in range(0, len(input[0])):
+            m_transposed[i][j] = input[j][i]
+    
+    return m_transposed
+
+def train_logistical_regression(X_train, y_train, a, num_iters):
+    #class 1 function (main call)
+    """
+    trains the model using gradient descent
+    args:
+        X_train (2d arr): training feature matrix
+        y_train (1d arr): training labels array
+        a (float): learning rate
+        num_iters: upper limit to update cycles
+    returns:
+        w(1d arr): finalized weight data
+        b (float): finalized bias data
+        loss_history (1d arr): record of previous loss values before final iteration
+    """
+    m, n = X_train.shape
+
+    w = np.random.randn(n) * 0.01
+    b = 0.0
+
+
+    loss_history = [0] * num_iters
+    for i in range(0, num_iters):
+        loss, dw, db = compute_loss_and_grads(X_train, y_train, w, b)
+        w -= a * dw
+        b -= b * dw
+        loss_history[i] = loss
+
+    return w, b, loss_history
 
 if __name__ == "__main__":
     main()

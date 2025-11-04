@@ -43,6 +43,7 @@ import math as m
 from PIL import Image, ImageOps
 
 
+
 def main():
     
     image_path = input("Enter the path to the image file: ")
@@ -87,8 +88,10 @@ def rgb_to_grayscale (img_array):
         for j in range(0, len(gray_values[0])):
             for k in range(0, len(ch_data)):
                 gray_values[i][j] += ch_data[k][i][j] 
-    
-    #normalize(gray_values)
+
+    gray_values = gray_values / 255
+    denormalize(gray_values)
+    gray_values = gray_values * 255
     
 
     return gray_values
@@ -121,17 +124,15 @@ def get_gaussian_kernel_weights(k_size, stdev):
     """
     calculates the weights of a kernel region for a gaussian blur application
     Args:
-        << centerX <int>: x-index of the center of the kernel
-        << centerY <int>: y-index of the center of the kernel
         << k_size <int>: size of the kernel
-        << img_data <list | 2d>: data representing image being blurred. this must be padded beforehand
+        << stdev <int>: the standard deviation to model weights
 
     Returns: 
         >> weights <list | 2d>: data representing the weights of a target kernel centered around (centerX, centerY) 
 
     Dependencies: 
-        <! Dimensionality: img_data must be 2-dimensional
-        <! Preprocessing: img_data must be padded
+        ! requires module 'math' to perform exponentiation
+        ! requires module 'numpy' to perform weight normalization
     """
     kernel = np.zeros((k_size, k_size))
     center = k_size // 2 #normally the center would be found by rounding up, but it is rounded down here because of indexing
@@ -139,7 +140,7 @@ def get_gaussian_kernel_weights(k_size, stdev):
         for y in range(0, k_size):
             dx = x - center
             dy = y - center
-            kernel[x, y] = (1/(2 * m.pi * stdev**2) ) * m.exp( (-1 * (  (dx ** 2) + (dy ** 2) ) / 2 * stdev**2 ) )
+            kernel[x, y] = (1/(2 * m.pi * stdev**2) ) * m.exp( (-1 * (  (dx ** 2) + (dy ** 2) ) / (2 * stdev**2 )) )
     weights = kernel / np.sum(kernel)
     return weights 
     
@@ -164,17 +165,22 @@ def f_convolve(f_img, f_kernel, k_size):
     k_rows, k_cols = f_kernel.shape
 
 
+    f_img = f_img.astype(np.float64)
+
     f_padded = np.pad(f_img, pad_width = radius, mode='symmetric' )
     #add pad to push convolution as otherwise matrix sizes will not match at edges
 
-    f_out = np.zeros_like(f_img)
+    f_out = np.zeros_like(f_img, dtype=np.float64)
     for r in range(f_rows):
         for c in range(f_cols):
             tar_reg = f_padded[r : r + k_rows, c : c + k_cols ]
-            f_out[r][c ] = np.sum(tar_reg * f_kernel)
+            f_out[r][c ] = round(np.sum(tar_reg * f_kernel))
+    #f_out=np.clip(f_out, 0, 255)
 
+    f_out = f_out.astype(np.uint8)
 
-    return f_out
+    return f_out #added to see if fixes issue
+    #return f_out
 
 
 def get_combination(array):
@@ -261,6 +267,18 @@ def normalize(ch_input):
             else:
                 ch_input[i][j] = m.pow( ((ch_input[i][j] + 0.055)/1.055), 2.4 )  
 
+def denormalize(ch_input):
+    """
+    Transforms linear float data back to sRGB (gamma-corrected) float data.
+    This is the inverse of the normalize() function.
+    Operates IN-PLACE on the input array.
+    """
+    # Use np.where for a fast, vectorized operation
+    srgb_low = ch_input <= 0.0031308
+    srgb_high = ~srgb_low
+    
+    ch_input[srgb_low] = ch_input[srgb_low] * 12.92
+    ch_input[srgb_high] = (1.055 * np.power(ch_input[srgb_high], (1 / 2.4))) - 0.055
 
 if __name__ == "__main__":
     main()
