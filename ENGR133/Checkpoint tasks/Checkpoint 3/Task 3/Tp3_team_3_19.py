@@ -202,7 +202,7 @@ def transpose_matrix(input: list):
     
     return m_transposed
 
-def train_logistical_regression(X_train, y_train, a, num_iters):
+def train_logistical_regression(X_train: list, y_train: list, a: float, num_iters: int):
     #class 1 function (main call)
     """
     trains the model using gradient descent
@@ -231,7 +231,7 @@ def train_logistical_regression(X_train, y_train, a, num_iters):
 
     return w, b, loss_history
 
-def calculate_metrics(y_pred, y_true):
+def calculate_metrics(y_pred: list, y_true: list):
     #class 1 function (main call)
     """
     calcultes the efficacy in which the prediction labels match true labels
@@ -246,6 +246,28 @@ def calculate_metrics(y_pred, y_true):
     error = 1 - accuracy
 
     return accuracy, error
+
+def evaluate_logistical_regression(X: list, y: list, w: list, b: float):
+    #class 1 function (main call)
+    """
+    evaluates the effectiveness of a trained dataset on new data
+    args:
+        X (2d arr): sample data to evaluate upon
+        y (1d arr): sample labels to evaluate upon
+        w (1d arr): finalized weight vectors
+        b (float): finalized bias scalar
+    returns:
+        accuracy (float): a measurement of the amount of successful predictions
+        error_rate (float): a measurement of the amount of unsuccessful predictions
+    """
+    y_pred = predict_labels(X, w, b)
+    accuracy, error_rate = calculate_metrics(y_pred, y)
+
+    return accuracy, error_rate
+
+#each function call is in a complete state, but L1 main will still require some work and I dont know if i can do this anymore
+#last time ive even slept is on sunday i feel like im losing grip on reality now
+#help
 
 if __name__ == "__main__":
     main()
