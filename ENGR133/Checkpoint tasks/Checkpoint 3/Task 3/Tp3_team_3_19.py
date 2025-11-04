@@ -231,6 +231,22 @@ def train_logistical_regression(X_train, y_train, a, num_iters):
 
     return w, b, loss_history
 
+def calculate_metrics(y_pred, y_true):
+    #class 1 function (main call)
+    """
+    calcultes the efficacy in which the prediction labels match true labels
+    args:
+        y_pred (1d arr): predicted labels array
+        y_true (1d arr): true labels array
+    returns:
+        accuracy (float): the accuracy rate of predictions that match true values
+        error_rate (float): the inverse of accuracy - a measurement of how many predictions deviate from true values
+    """
+    accuracy = np.mean(y_pred == y_true)
+    error = 1 - accuracy
+
+    return accuracy, error
+
 if __name__ == "__main__":
     main()
 
