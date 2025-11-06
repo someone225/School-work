@@ -8,7 +8,7 @@ Description:
 Assignment Information:
     Assignment:     e.g. checkpoint 3 task 3
     Team ID:        007 - 19
-    Author:         MarkN, Sheng65@purdue.edu
+    Author:         Mark, Sheng65@purdue.edu
     Date:           e.g. 01/23/2025
 
 Contributors:
@@ -34,7 +34,9 @@ Academic Integrity Statement:
 import math as m
 import numpy as np
 
-from Team19CustomUtils import mlUtils
+from Team19CustomUtils import mlUtils   #mlUtils is a module introduced in ver 0.1.1 of Team19CustomUtils
+                                        #usage of this module requires ver 0.1.1 or above
+                                        #run pip install --upgrade Team-19-Custom-Utils-Lib for most recent version
 
 def main():
     z = mlUtils.calculate_sigmoid(10)
