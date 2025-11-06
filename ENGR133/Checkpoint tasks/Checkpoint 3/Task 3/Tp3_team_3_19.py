@@ -39,6 +39,7 @@ from Team19CustomUtils import mlUtils   #mlUtils is a module introduced in ver 0
                                         #run pip install --upgrade Team-19-Custom-Utils-Lib for most recent version
 
 def main():
+    #this is all just random testing I don't have a functional main
     z = mlUtils.calculate_sigmoid(10)
     print(z)
 
