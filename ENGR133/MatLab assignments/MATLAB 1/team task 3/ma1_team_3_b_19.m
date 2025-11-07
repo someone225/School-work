@@ -30,21 +30,27 @@
 %     another student access to my code.  The project I am
 %     submitting is my own original work.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+x = input("Enter the value of x: ");
+tar = input("Enter the target error threshold percentage: ");
+fprintf("Target error threshold: %d%s\n", tar, "%");
+terms = 0;
 
+approximate = 0;
+actual = exp(x);
+diff = 0;
+error = 100;
 
+while error > tar
+    approximate = maclaurin(x, terms);
+    diff = approximate - actual;
+    error = abs( diff/actual * 100 );
+    %%fprintf("  debug: erorr = %f\n", error);
+    terms = terms + 1;
+end
 
-%% ____________________
-%% INITIALIZATION
-
-
-%% ____________________
-%% CALCULATIONS
-
-%% ____________________
-%% OUTPUTS
-
-x = f(3);
-disp(x);
+fprintf("Actual value: %.2f\n", actual);
+fprintf("Terms needed: %d\n", terms);
+fprintf("Approximate value: %.2f\n", approximate);
 
 
 function out = f(n)
@@ -52,5 +58,19 @@ function out = f(n)
     for i = n:-1:1
         t = t * i;
     end
-    out = t;
+
+    if n == 0
+        out = 1;
+    else
+        out = t;
+    end
+end
+
+
+function out = maclaurin(num, precision)
+    sum = 0;
+    for i = 0:1:precision
+        sum = sum + ( num^i / f(i) );
+    end
+    out = sum;
 end
