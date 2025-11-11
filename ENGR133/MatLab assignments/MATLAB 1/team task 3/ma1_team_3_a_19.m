@@ -32,25 +32,36 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
+n = input("What is the n value? ");
+x = input("What is the x value? ");
 
-%% ____________________
-%% INITIALIZATION
+approximate = maclaurin(x, n);
+actual = exp(x);
+diff = approximate - actual;
+error = diff/actual * 100;
 
-
-%% ____________________
-%% CALCULATIONS
-
-%% ____________________
-%% OUTPUTS
-
-x = f(3);
-disp(x);
-
+fprintf("Approximate value: %.2f\n", approximate);
+fprintf("Actual value: %.2f\n", actual);
+fprintf("Error: %.1f%s\n", error, "%");
 
 function out = f(n)
     t = 1;
     for i = n:-1:1
         t = t * i;
     end
-    out = t;
+
+    if n == 0
+        out = 1;
+    else
+        out = t;
+    end
+end
+
+
+function out = maclaurin(num, precision)
+    sum = 0;
+    for i = 0:1:precision
+        sum = sum + ( num^i / f(i) );
+    end
+    out = sum;
 end
