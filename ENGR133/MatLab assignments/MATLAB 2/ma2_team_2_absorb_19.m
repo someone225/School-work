@@ -1,5 +1,11 @@
-function [out] = ma2_team_2_absorb_19(F2, S, W, chi, alpha, theta)
+function out = dtr(in)
+%degrees to radians
+out = in * pi/180;
+end
 
-out = (alpha * W * sin(theta + chi) ) / (S * cos(theta) * (1 - F2 * (1 - alpha)));
+
+function [out] = absorb(F2, S, W, chi, alpha, theta)
+
+out = (alpha * W * sin(dtr( theta + chi) ) ) / (S * cos(dtr( theta) ) * (1 - F2 * (1 - alpha)));
 
 end
