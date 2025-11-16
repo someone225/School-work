@@ -9,10 +9,13 @@
 %     Assignment:     14.2.1 MA1 Team 3 (for MATLAB 1 Team task 3)
 %     Team ID:        007 - 19 (e.g. LC1 - 01; for section LC1, team 01)
 %     Author:         Mark, Sheng65@purdue.edu
-%     Date:           e.g. 03/24/2025
+%     Date:           11/07/2025
 %
 % Contributor:
-%     Name, login@purdue [repeat for each]
+%     Mark, Sheng65@purdue.edu
+%     Akshada, dakea@purdue.edu
+%     Milagros, mmelhemb@purdue.edu
+%     Erdem, eamarsa@purdue.edu 
 %
 %     My contributor(s) helped me:
 %     [ ] understand the assignment expectations without
@@ -30,20 +33,6 @@
 %     another student access to my code.  The project I am
 %     submitting is my own original work.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-
-n = input("What is the n value? ");
-x = input("What is the x value? ");
-
-approximate = maclaurin(x, n);
-actual = exp(x);
-diff = approximate - actual;
-error = diff/actual * 100;
-
-fprintf("Approximate value: %.2f\n", approximate);
-fprintf("Actual value: %.2f\n", actual);
-fprintf("Error: %.1f%s\n", error, "%");
-
 function out = f(n)
     t = 1;
     for i = n:-1:1
@@ -65,3 +54,16 @@ function out = maclaurin(num, precision)
     end
     out = sum;
 end
+
+n = input("What is the n value? ");
+x = input("What is the x value? ");
+
+approximate = maclaurin(x, n);
+actual = exp(x);
+diff = approximate - actual;
+error = diff/actual * 100;
+
+fprintf("Approximate value: %.2f\n", approximate);
+fprintf("Actual value: %.2f\n", actual);
+fprintf("Error: %.1f%s\n", error, "%");
+
