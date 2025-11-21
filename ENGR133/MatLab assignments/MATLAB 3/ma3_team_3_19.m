@@ -7,8 +7,6 @@
     %%therefore pumps = minCirculationRate / 15
 
 
-
-
 function [volume, dims, maxSwimmers, minPumpRate, pumps] = matchData (swimmers, divingIndicator, dataFileName)
 %matchData - returns data of closest match to inputs
 % args:
@@ -43,20 +41,19 @@ function [volume, dims, maxSwimmers, minPumpRate, pumps] = matchData (swimmers, 
         minDepth = 0;
     end
     poolVolume = zeros(1, L);
-    poolDims = zeros(1, W - 1);
+    poolDims = zeros(L, W - 1);
     
 
     %split data into volume and dimensions matrices
     cv = 1;
-    cd = 1;
     for i = 1:L   
         for j = 1:W
             if(j == 1)
                 poolVolume(cv) = data(i,j);
                 cv = cv + 1;
             else
-                poolDims(cd) = data(i, j);
-                cd = cd + 1;
+                poolDims(i, j - 1) = data(i, j);
+                
             end
         end
     end
@@ -69,7 +66,7 @@ function [volume, dims, maxSwimmers, minPumpRate, pumps] = matchData (swimmers, 
             validIndexCount = validIndexCount + 1;
         end
     end
-    
+ 
     validIndexes = zeros(1, validIndexCount);
 
     ci = 1;
@@ -80,12 +77,18 @@ function [volume, dims, maxSwimmers, minPumpRate, pumps] = matchData (swimmers, 
         end
     end
 
+    %disp(validIndexes);
+
+    
+
     %calculate error margins for each data set
-    diff = zeroes(1,validIndexCount);
+    diff = zeros(1,validIndexCount);
     for i = 1:length(validIndexes)
         diff(i) = ( poolDims(validIndexes(i), 2) * poolDims(validIndexes(i), 3) ) - tarArea; 
     end
 
+    %disp(diff);
+    
     minDiff = getMin(diff);
 
     %find data set with least margin of error
@@ -96,9 +99,17 @@ function [volume, dims, maxSwimmers, minPumpRate, pumps] = matchData (swimmers, 
             break;
         end
     end
+    %disp(tarDiffIndex);
 
+    
+    
     matchedArea = diff(tarDiffIndex) + tarArea;
+    %disp(matchedArea);
+
     maxSwimmers = matchedArea / 25;
+    %disp(maxSwimmers);
+
+   
 
    %match with data of least error
    tarIndex = 1;
@@ -109,26 +120,23 @@ function [volume, dims, maxSwimmers, minPumpRate, pumps] = matchData (swimmers, 
        end
    end
 
+   %disp(tarIndex);
+
 
    dSize = size(poolDims);
    dims = zeros(1, dSize(2));
    for i = 1:dSize(2)
         dims(i) = poolDims(tarIndex, i);
    end
-
-   volume = poolVolume(tarIndex);
-   minPumpRate = 3 * volume / 1440;
-   pumps = ceil(minPumpRate / 15);
-
+   %disp(dims)
    
 
-
-
-
-        
-
-    
-
+   volume = poolVolume(tarIndex);
+   %disp(volume);
+   minPumpRate = 3 * volume / 1440;
+   %disp(minPumpRate);
+   pumps = ceil(minPumpRate / 15);
+   %disp(pumps);
 end
 
 function min = getMin(arr)
@@ -141,4 +149,11 @@ min = arr(1);
     end
 
 end
+
+
+%%test code
+[v, d, s, pRate, pNum] = matchData(10, 1, "Data_pool_info.csv");
+
+disp(pNum);
+
     
