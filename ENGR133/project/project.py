@@ -13,8 +13,9 @@ with open('Weapons.json', 'r') as file:
 with open('reforges.json', 'r') as file:
     reforgeData = json.load(file)
 
-debugMode = 0
+
 rng = np.random.default_rng()
+
 
 
 
@@ -24,7 +25,10 @@ class player:
     defense = None
     regeneration = None
     damage = None
+    apRatio =  None
     weapon = None
+    weaponReforge = None
+    debug = 0
 
     def __init__(self):
         with open('difficulty.json', 'r') as file:
@@ -37,8 +41,8 @@ class player:
         difficultySelection = 0    
         difficultySelection = generalUtils.scanNumericalInput('range', difficultySelection, [0, difficultyData['gameModeData']['dLength']], "enter a choice: ")
         if difficultySelection == 0:
-            print("Debug mode selected!")
-            debugMode = 1
+            print("\033[92mDebug mode selected!\033[0m")
+            self.debug = 1
         else:
             difficultySelection = 'difficulty' + str(difficultySelection)
             print("you have selected %s mode" %difficultyData['gameModeData'][difficultySelection]['name'])
@@ -57,6 +61,10 @@ for i in range(0, len(populator)):
     populator[i] = i + 1
 Tree.setSeed(3, 2, 2, populator, False)
 Tree.populateBuffers()
+divergenceOptions = [0] * Tree.seed[2]
+for i in range(0, Tree.seed[2]):
+    divergenceOptions[i] = i + 1
+
 
 print("The seed this run is ", end='')
 for i in range(0, len(Tree.seed)):
@@ -65,7 +73,7 @@ for i in range(0, len(populator)):
     print(populator[i], sep = '', end = '')
 
 
-def combat(Player: player, enemy: int):
+def combat(Player: player, enemy: int, devMode: int):
     #function to begin a combat encounter
     enemyName = enemyData['enemyData']['enemy' + str(enemy)]['name']
     enemyHP = enemyData['enemyData']['enemy' + str(enemy)]['baseHealth']
@@ -73,55 +81,119 @@ def combat(Player: player, enemy: int):
     enemyATK = enemyData['enemyData']['enemy' + str(enemy)]['baseDamage']
 
     print("Combat initiated against %s - %d HP / %d DEF / %d ATK" % (enemyName, enemyHP, enemyDEF, enemyATK ) ) 
+    if devMode == 1:
+        print("\033[91mL BOZO!\033[0m %s died to elite hacker skills" % enemyName)
+        dropLoot(Player)
+        return 1
+    else:
+        while enemyHP > 0:
+            moveSelection = 0
+            for turnCount in range(1, 2):
+                match turnCount:
+                    case 1:
+                        #player turn
+                        print("Your turn! What will you do?")
+                        print("(1) Attack")
+                        print("(2) Defend")
+                        userInput = 0
+                        userInput = generalUtils.scanNumericalInput('range', userInput, [1,2], 'Make your choice: ')
+                        match userInput:
+                            case 1:
+                                #attack
+                                moveSelection = 1
+                                print("You dealt %d damage!" %Player.damage)
+                                enemyHP -= Player.damage
+                                print("%s is now on %d HP" % (enemyName, enemyHP) )
+                            case 2:
+                                #defend
+                                moveSelection = 2
+                                print("")
+                    case 2:
+                        #enemy turn
+                        print("")
 
-    while enemyHP > 0:
-        moveSelection = 0
-        for turnCount in range(1, 2):
-            match turnCount:
-                case 1:
-                    #player turn
-                    print("Your turn! What will you do?")
-                    print("(1) Attack")
-                    print("(2) Defend")
-                    input = 0
-                    input = generalUtils.scanNumericalInput('range', input, [1,2], 'Make your choice: ')
-                    match input:
-                        case 1:
-                            #attack
-                            moveSelection = 1
-                            print("You dealt %d damage!" %Player.damage)
-                            enemyHP -= Player.damage
-                            print("%s is now on %d HP" % (enemyName, enemyHP) )
-                        case 2:
-                            #defend
-                            moveSelection = 2
-                            print("")
-                case 2:
-                    #enemy turn
-                    print("")
 
     return 0
 
-def dropLoot():
+def dropLoot(Player: player):
     #returns weaponID of dropped weapon, if any, otherwise return 0
     roll = rng.random()
+    out = 0
     for i in range(weaponData['weaponData']['dLength'], 0, -1):
         if(roll <= weaponData['weaponData']['weapon' + str(i)]['obtainRate']):
-            return i
-    return 0
+            out = i
+            break
+   
+    if not(out == 0):
+        reforgeID = np.random.randint(1, weaponData['weaponData']['dLength'])
+        reforgeIndex = 'reforge' + str(reforgeID)
+        weaponIndex = 'weapon' + str(out)
+
+        reforgeName = str(reforgeData['reforgeData'][reforgeIndex]['name'])
+        baseName = str(weaponData['weaponData'][weaponIndex]['name'])
+        
+
+        weaponName = reforgeName + baseName
+        weaponDamage = weaponData['weaponData'][weaponIndex]['baseDamage'] * reforgeData['reforgeData'][reforgeIndex]['baseDamageModifier']
+        weaponPierce = weaponData['weaponData'][weaponIndex]['apRatio'] * reforgeData['reforgeData'][reforgeIndex]['apModifier']
+        weaponBonus = weaponData['weaponData'][weaponIndex]['extraMoves']
+        print("you got %s! %d ATK / %d%% AP / %d extra moves" %(weaponName, weaponDamage, weaponPierce * 100, weaponBonus))
+        userInput = 0
+        userInput = generalUtils.scanNumericalInput('match', userInput, [0, 1], ("Would you like to equip this weapon? (0) - N / (1) - Y: "))
+        if(userInput == 1):
+            Player.damage = weaponDamage
+            Player.apRatio = weaponPierce
+            print("you equipped %s" %weaponName)
+        else:
+            print("you discarded %s" %weaponName)
+    
+    else:
+        print("\033[91mUNLUCKY!\033[0m L'il bro didn't even drop anything sucks to suck")
+        temp = input("enter any key to proceed: ")
+
+    
     
 
 #the current buffer will indicate which enemies are to be fought on the current depth
 #the future buffer will indicate which enemies are to be fought on the next depth
 
-if(debugMode == 1):
-    print("\ndebug: enemies encountered on current depth: ", end = '')
-    for i in range(0, len(Tree.presentBuffer)):
-        selector = 'enemy' + str(Tree.presentBuffer[i])
-        print(enemyData['enemyData'][selector]['name'], sep = '', end = '')
-        if i < len(Tree.presentBuffer) - 1:
-            print(", ", sep = '', end = '')
-    print("\n")
+if(Player.debug == 1):
+
+    while Tree.currentDepth <= Tree.seed[0]:
+    
+        print("\ndebug: enemies encountered on current depth: ", end = '')
+        for i in range(0, len(Tree.presentBuffer)):
+            selector = 'enemy' + str(Tree.presentBuffer[i])
+            print(enemyData['enemyData'][selector]['name'], sep = '', end = '')
+            if i < len(Tree.presentBuffer) - 1:
+                print(", ", sep = '', end = '')
+        print("\n")
+
+        for i in range(0, len(Tree.presentBuffer)):
+            combat(Player, Tree.presentBuffer[i], 1)
+        print("You have completed floor %d" %Tree.currentDepth)
+        if(Tree.currentDepth == Tree.seed[0]):
+            print("Congrats, you cleared this stupid game")
+            break      
+        print("Choose a random set of enemies to fight for floor %d" %(Tree.currentDepth + 1))
+        for i in range(0, len(Tree.lookAheadBuffer)):
+            print("(%d) " %(i + 1), sep = '', end = '')
+            for j in range(0, len(Tree.lookAheadBuffer[0])):
+                selector = 'enemy' + str(Tree.lookAheadBuffer[i][j])
+                print("???", sep = '', end = '')
+                if j < len(Tree.lookAheadBuffer[0]) - 1:
+                    print(", ", sep = '', end = '')
+            print('\n', sep = '', end = '')
+        userInput = 0
+        userInput = generalUtils.scanNumericalInput('range', userInput, divergenceOptions, "Make Your Choice: ")
+        print("Good Luck")
+        Tree.advanceDepths(userInput)
+            
+    
+else:
+    print("\nNon debug mode hasn't been finished yet lol")
+    
+
 
 
 
