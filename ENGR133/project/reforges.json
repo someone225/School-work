@@ -1,0 +1,34 @@
+{
+    "reforgeData": 
+    {
+        "reforge1": 
+        {
+            "name": "blunt",
+            "baseDamageModifier": 0.7,
+            "apModifier": 0.7
+        },
+
+        "reforge2": 
+        {
+            "name": "moldy",
+            "baseDamageModifier": 1.0,
+            "apModifier": 0.3
+        },
+
+        "reforge3": 
+        {
+            "name": "sharp",
+            "baseDamageModifier": 1.25,
+            "apModifier": 1.1
+        },
+
+        "reforge4": 
+        {
+            "name": "precise",
+            "baseDamageModifier": 1.0,
+            "apModifier": 2.0
+        }
+
+    }
+
+}

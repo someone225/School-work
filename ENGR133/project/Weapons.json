@@ -1,0 +1,53 @@
+{
+    "weaponData":
+    {
+        "dLength": 4,
+
+        "weapon1":
+        {
+            "name": "belt",
+            "description": "at least he came back with the milk",
+            "baseDamage": 5,
+            "apRatio": 0.0,
+            "extraMoves": 0,
+            "movePriority": 0,
+            "obtainRate": 0.5
+
+        },
+
+        "weapon2":
+        {
+            "name": "shank",
+            "description": "become bri'ish and colonize your enemies with stab wounds",
+            "baseDamage": 10,
+            "apRatio": 0.25,
+            "extraMoves": 1,
+            "movePriority": 1,
+            "obtainRate": 0.3
+        },
+
+        "weapon3":
+        {
+            "name": "pocket sand",
+            "description": "the oldest trick in the book",
+            "baseDamage": 20,
+            "apRatio": 1.0,
+            "extraMoves": 0,
+            "movePriority": 2,
+            "obtainRate": 0.25
+        },
+
+        "weapon4":
+        {
+            "name": "super ultra omega ItsOver9000 edgelord cybernetic 500 cigarettes ratatouile saber",
+            "description": "average powercreep moment",
+            "baseDamage": 9999,
+            "apRatio": 0.67,
+            "extraMoves": 69,
+            "movePriority": 666,
+            "obtainRate": 0.001
+        }
+
+
+    }
+}

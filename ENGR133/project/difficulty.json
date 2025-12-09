@@ -1,0 +1,35 @@
+{
+    "gameModeData":
+    {
+        "dLength": 3,
+
+        "difficulty1": 
+        {
+            "name": "game journalist",
+            "startingHealth": 100,
+            "startingDefense": 25,
+            "startingRegeneration": 10,
+            "startingSpeed": 2
+        },
+
+        "difficulty2": 
+        {
+            "name": "normal",
+            "startingHealth": 50,
+            "startingDefense": 0,
+            "startingRegeneration": 2,
+            "startingSpeed": 1
+        },
+
+        "difficulty3": 
+        {
+            "name": "monsoon",
+            "startingHealth": 30,
+            "startingDefense": 0,
+            "startingRegeneration": 1,
+            "startingSpeed": 0
+        }
+
+    }
+
+}

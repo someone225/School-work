@@ -1,0 +1,39 @@
+{
+
+    "enemyData":
+    {
+        "dLength": 3,
+
+        "enemy1":
+        {
+        
+            "name": "small enemy spider",
+            "baseHealth": 10,
+            "baseDefense": 0,
+            "baseDamage": 5,
+            "movePriority": 2
+
+        },
+
+        "enemy2":
+        {
+            "name": "bob",
+            "baseHealth": 25,
+            "baseDefense": 5,
+            "baseDamage": 12,
+            "movePriority": 1
+        },
+
+        "enemy3":
+        {
+            "name": "evil fucking wizard",
+            "baseHealth": 100,
+            "baseDefense": 0,
+            "baseDamage": 33,
+            "movePriority": 1
+        }
+
+
+        
+    }
+}
