@@ -10,8 +10,8 @@
             "name": "small enemy spider",
             "baseHealth": 10,
             "baseDefense": 0,
-            "baseDamage": 5,
-            "movePriority": 2
+            "baseDamage": 5
+            
 
         },
 
@@ -20,17 +20,15 @@
             "name": "bob",
             "baseHealth": 25,
             "baseDefense": 5,
-            "baseDamage": 12,
-            "movePriority": 1
+            "baseDamage": 12
         },
 
         "enemy3":
         {
             "name": "evil fucking wizard",
             "baseHealth": 100,
-            "baseDefense": 0,
-            "baseDamage": 33,
-            "movePriority": 1
+            "baseDefense": 2,
+            "baseDamage": 12
         }
 
 

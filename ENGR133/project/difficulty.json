@@ -5,29 +5,32 @@
 
         "difficulty1": 
         {
-            "name": "game journalist",
+            "name": "Game Journalist",
+            "description": "baby's first video game",
             "startingHealth": 100,
             "startingDefense": 25,
             "startingRegeneration": 10,
-            "startingSpeed": 2
+            "startingDamage": 10
         },
 
         "difficulty2": 
         {
-            "name": "normal",
+            "name": "Normal",
+            "description": "you can make mistakes, just not too many",
             "startingHealth": 50,
-            "startingDefense": 0,
-            "startingRegeneration": 2,
-            "startingSpeed": 1
+            "startingDefense": 10,
+            "startingRegeneration": 5,
+            "startingDamage": 5
         },
 
         "difficulty3": 
         {
-            "name": "monsoon",
+            "name": "Eclipse", 
+            "description": "'You only celebrate in the light... because I allow it.' ",
             "startingHealth": 30,
-            "startingDefense": 0,
+            "startingDefense": 5,
             "startingRegeneration": 1,
-            "startingSpeed": 0
+            "startingDamage": 3
         }
 
     }
